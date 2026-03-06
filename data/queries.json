@@ -1,0 +1,38 @@
+{
+  "alice": [
+    {"id": "alice-q01", "text": "What happens when Alice drinks from the bottle labeled DRINK ME?"},
+    {"id": "alice-q02", "text": "How does the Cheshire Cat disappear?"},
+    {"id": "alice-q03", "text": "What are the rules of the Queen's croquet game?"},
+    {"id": "alice-q04", "text": "Who are the guests at the Mad Hatter's tea party?"},
+    {"id": "alice-q05", "text": "Why is the White Rabbit always in a hurry?"},
+    {"id": "alice-q06", "text": "What advice does the Caterpillar give Alice?"},
+    {"id": "alice-q07", "text": "How does Alice get out of the room that is too small for her?"},
+    {"id": "alice-q08", "text": "What is the cause of the trial at the end of the story?"},
+    {"id": "alice-q09", "text": "How does Alice's size change throughout her adventures?"},
+    {"id": "alice-q10", "text": "What strange things does Alice observe in the Duchess's kitchen?"}
+  ],
+  "fastapi": [
+    {"id": "fastapi-q01", "text": "How do you define a path parameter in FastAPI?"},
+    {"id": "fastapi-q02", "text": "What is the difference between query parameters and path parameters?"},
+    {"id": "fastapi-q03", "text": "How does FastAPI validate request body data?"},
+    {"id": "fastapi-q04", "text": "How do you declare optional query parameters with default values?"},
+    {"id": "fastapi-q05", "text": "What is a response model and how do you use it to filter output fields?"},
+    {"id": "fastapi-q06", "text": "How does dependency injection work in FastAPI?"},
+    {"id": "fastapi-q07", "text": "How do you add OAuth2 authentication to a FastAPI app?"},
+    {"id": "fastapi-q08", "text": "How do you return different HTTP status codes from an endpoint?"},
+    {"id": "fastapi-q09", "text": "What is Pydantic and how does FastAPI use it for data validation?"},
+    {"id": "fastapi-q10", "text": "How do you run FastAPI in development mode with automatic reload?"}
+  ],
+  "space": [
+    {"id": "space-q01", "text": "What were the goals of the Apollo program and how many Moon landings succeeded?"},
+    {"id": "space-q02", "text": "How does the Space Shuttle's main engine system work?"},
+    {"id": "space-q03", "text": "What scientific experiments are conducted on the International Space Station?"},
+    {"id": "space-q04", "text": "What discoveries has the Hubble Space Telescope made about the age of the universe?"},
+    {"id": "space-q05", "text": "What caused the Space Shuttle Challenger disaster?"},
+    {"id": "space-q06", "text": "How do astronauts on the ISS deal with microgravity effects on the human body?"},
+    {"id": "space-q07", "text": "What is the history of Mars exploration missions?"},
+    {"id": "space-q08", "text": "How did Apollo 13 survive its mission failure?"},
+    {"id": "space-q09", "text": "What countries have contributed modules or crew to the International Space Station?"},
+    {"id": "space-q10", "text": "How does a spacecraft re-enter Earth's atmosphere safely?"}
+  ]
+}

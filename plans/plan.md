@@ -22,7 +22,7 @@ An interactive visualization tool that shows how Retrieval-Augmented Generation 
 - Live cosine similarity retrieval — pure TypeScript, no library, runs in-browser
 - Animated retrieval — matched chunks highlight and activate in the visualization
 - Prompt construction view — shows exactly how retrieved chunks assemble into the final prompt
-- LLM answer streamed via **OpenRouter** (free model, key stored in Vercel env vars)
+- LLM answer streamed via configurable OpenAI-compatible adapter (defaults to OpenRouter, works with local Ollama too)
 - Source chunks stay highlighted while the answer streams
 
 ### Data (fully pre-computed, stored as static JSON)
@@ -43,7 +43,7 @@ Stored in `ui/public/data/` — served as static assets from Vercel's CDN.
 | Visualization | `@react-three/fiber` + `@react-three/drei` | 3D embedding space in React |
 | Embeddings | Pre-computed — no runtime model | Fully static, zero dependencies at query time |
 | Vector search | Cosine similarity — plain TypeScript | Transparent, no library, runs in-browser |
-| LLM | OpenRouter — `mistralai/mistral-7b-instruct` (free tier) | Simple API, free, open model |
+| LLM | OpenAI-compatible adapter — defaults to OpenRouter, swappable via env vars | Works with OpenRouter, Ollama, LM Studio, vLLM |
 | Deployment | Vercel | Zero config |
 
 ### Key UX flows

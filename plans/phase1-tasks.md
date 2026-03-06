@@ -94,14 +94,29 @@ python scripts/prepare_data.py --corpus space --input scripts/raw/space/
 
 ---
 
-### B2. OpenRouter API route
+### B2. LLM API route (configurable adapter)
 
-- Add `ui/.env.local` with `OPENROUTER_API_KEY`
-- Add `ui/.env.example` (no real key)
-- Create `ui/src/app/api/chat/route.ts` — receives assembled prompt, proxies to OpenRouter, streams response back
-- Test with a hardcoded prompt via `curl`
+The LLM backend is configurable via env vars using an adapter pattern. All backends must expose an OpenAI-compatible `/v1/chat/completions` endpoint.
 
-**Done when:** `curl` to `/api/chat` returns a streamed LLM response.
+- `ui/src/lib/llm/types.ts` — `LLMAdapter` interface, `ChatMessage`, `LLMConfig`
+- `ui/src/lib/llm/openai-compatible.ts` — single adapter that handles OpenRouter, Ollama, LM Studio, vLLM, etc.
+- `ui/src/lib/llm/factory.ts` — reads env vars, returns adapter; constants for defaults
+- `ui/src/app/api/chat/route.ts` — receives `{ messages }`, proxies to adapter, streams response
+- `ui/.env.example` — documents `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` with examples for both OpenRouter and Ollama
+
+```bash
+# OpenRouter (default)
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=mistralai/mistral-7b-instruct:free
+LLM_API_KEY=sk-or-...
+
+# Ollama (local)
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=mistral
+LLM_API_KEY=ollama
+```
+
+**Done when:** `curl` to `/api/chat` returns a streamed response from whichever backend is configured.
 
 ---
 
