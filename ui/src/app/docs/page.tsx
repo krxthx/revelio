@@ -7,8 +7,10 @@ const Section = ({ id, title, children }: { id: string; title: string; children:
   </section>
 );
 
-const P = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-sm leading-relaxed text-muted-foreground">{children}</p>
+const P = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <p className={["text-sm leading-relaxed text-foreground/90", className].filter(Boolean).join(" ")}>
+    {children}
+  </p>
 );
 
 const Code = ({ children }: { children: React.ReactNode }) => (
@@ -29,10 +31,11 @@ const Docs = () => (
       className="fixed inset-0 pointer-events-none"
       style={{
         backgroundImage: `
-          linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
+          radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 36%),
+          radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 44%),
+          radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--primary) 5%, transparent), transparent 48%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(10, 10, 10, 0.58))
         `,
-        backgroundSize: "80px 80px",
       }}
     />
     <NavBar />
@@ -132,7 +135,9 @@ top_k = sorted(chunks, by=similarity, descending=True)[:k]`}</Block>
             <li>Retrieve the top-K most semantically similar chunks from your corpus.</li>
             <li>
               Build a prompt that pastes those chunks in as context:{" "}
-              <em className="text-foreground">"Given this context, answer the question."</em>
+              <em className="text-foreground">
+                &ldquo;Given this context, answer the question.&rdquo;
+              </em>
             </li>
             <li>Send the prompt to an LLM and stream the answer back.</li>
           </ol>

@@ -14,6 +14,7 @@ const LandingCanvas = dynamic(() => import("@/components/landing-canvas"), {
 const Home = () => {
   const [canvasReady, setCanvasReady] = useState(false);
   const { accentColor } = useAccent();
+  const ctaColor = `color-mix(in srgb, ${accentColor} 78%, #0a0a0a)`;
 
   return (
     <div className="relative flex h-screen flex-col overflow-hidden bg-background text-foreground">
@@ -22,15 +23,16 @@ const Home = () => {
         <LandingCanvas accentColor={accentColor} onReady={() => setCanvasReady(true)} />
       </div>
 
-      {/* Grid overlay */}
+      {/* Atmosphere overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
+            radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 34%),
+            radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--primary) 13%, transparent), transparent 42%),
+            radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 46%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(10, 10, 10, 0.5))
           `,
-          backgroundSize: "80px 80px",
         }}
       />
 
@@ -66,7 +68,7 @@ const Home = () => {
           <div className="flex items-center gap-3">
             <Link
               href="/demo"
-              style={{ backgroundColor: accentColor }}
+              style={{ backgroundColor: ctaColor }}
               className="inline-flex h-9 items-center rounded-md px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
               Try the Demo

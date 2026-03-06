@@ -10,17 +10,26 @@ interface Props {
 
 const NavBar = ({ rightSlot }: Props) => {
   const pathname = usePathname();
+  const transparentHeader =
+    pathname === "/" || pathname === "/docs" || pathname.startsWith("/docs/");
 
   const linkClass = (href: string) =>
     [
       "inline-flex h-7 items-center rounded px-2.5 text-xs transition-colors",
       pathname === href || pathname.startsWith(href + "/")
-        ? "text-foreground bg-muted"
-        : "text-muted-foreground hover:text-foreground hover:bg-muted",
+        ? "text-primary"
+        : "text-muted-foreground hover:text-foreground",
     ].join(" ");
 
   return (
-    <header className="flex shrink-0 items-center justify-between border-b border-border bg-background px-5 py-3">
+    <header
+      className={[
+        "sticky top-0 z-40 flex shrink-0 items-center justify-between px-5 py-3",
+        transparentHeader
+          ? "border-b border-transparent bg-transparent"
+          : "border-b border-border bg-background/85 backdrop-blur",
+      ].join(" ")}
+    >
       <div className="flex items-center gap-4">
         <Link href="/" className="text-sm font-semibold tracking-tight text-foreground">
           Revelio

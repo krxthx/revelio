@@ -66,8 +66,11 @@ const AppSettingsMenu = ({
 
       {open && (
         <div className="absolute right-0 top-11 z-50 w-64 rounded-lg border border-border bg-card p-3 shadow-xl">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Settings
+          </p>
+          <p className="mb-3 text-[11px] text-muted-foreground/75">
+            Tune retrieval, corpus, and accent colors.
           </p>
 
           <div className="mb-4">
