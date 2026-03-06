@@ -22,14 +22,14 @@ interface Props {
   onHover: (chunk: Chunk | null) => void;
 }
 
-export default function ChunkPoint({
+const ChunkPoint = ({
   chunk,
   isRetrieved,
   isDimmed,
   streaming,
   retrievedColor,
   onHover,
-}: Props) {
+}: Props) => {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -79,4 +79,6 @@ export default function ChunkPoint({
       />
     </mesh>
   );
-}
+};
+
+export default ChunkPoint;

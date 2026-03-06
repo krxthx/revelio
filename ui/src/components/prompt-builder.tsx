@@ -12,12 +12,12 @@ interface Props {
   retrievedChunks: Chunk[];
 }
 
-function buildPrompt(query: string, chunks: Chunk[]): string {
+const buildPrompt = (query: string, chunks: Chunk[]): string => {
   const context = chunks.map((c, i) => `[${i + 1}] ${c.text}`).join("\n\n");
   return `Context:\n${context}\n\nQuestion: ${query}`;
-}
+};
 
-export default function PromptBuilder({ query, retrievedChunks }: Props) {
+const PromptBuilder = ({ query, retrievedChunks }: Props) => {
   const [open, setOpen] = useState(false);
   const hasContent = query !== null && retrievedChunks.length > 0;
 
@@ -58,9 +58,9 @@ export default function PromptBuilder({ query, retrievedChunks }: Props) {
       )}
     </div>
   );
-}
+};
 
-function PromptSection({
+const PromptSection = ({
   label,
   color,
   children,
@@ -68,14 +68,15 @@ function PromptSection({
   label: string;
   color: string;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <div>
       <span className={`mb-1 block text-[10px] uppercase tracking-wider ${color}`}>{label}</span>
       <p className="whitespace-pre-wrap wrap-break-word leading-relaxed text-foreground">{children}</p>
     </div>
   );
-}
+};
 
 // Keep buildPrompt available for external use
 export { buildPrompt };
+export default PromptBuilder;

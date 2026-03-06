@@ -8,7 +8,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export default function CorpusSelector({ selected, onChange, disabled }: Props) {
+const CorpusSelector = ({ selected, onChange, disabled }: Props) => {
   return (
     <div className="flex items-center gap-2">
       <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -34,4 +34,6 @@ export default function CorpusSelector({ selected, onChange, disabled }: Props) 
       </div>
     </div>
   );
-}
+};
+
+export default CorpusSelector;

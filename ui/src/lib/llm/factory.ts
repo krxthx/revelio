@@ -25,10 +25,10 @@ const DEFAULTS = {
   API_KEY: "",
 } as const;
 
-export function createLLMAdapter(): LLMAdapter {
+export const createLLMAdapter = (): LLMAdapter => {
   const baseUrl = process.env.LLM_BASE_URL ?? DEFAULTS.BASE_URL;
   const model = process.env.LLM_MODEL ?? DEFAULTS.MODEL;
   const apiKey = process.env.LLM_API_KEY ?? DEFAULTS.API_KEY;
 
   return new OpenAICompatibleAdapter({ baseUrl, model, apiKey });
-}
+};

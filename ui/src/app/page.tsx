@@ -3,19 +3,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import CorpusSelector from "@/components/CorpusSelector";
-import QuerySelector from "@/components/QuerySelector";
-import PromptBuilder from "@/components/PromptBuilder";
-import AnswerPanel from "@/components/AnswerPanel";
-import ChunkTooltip from "@/components/ChunkTooltip";
-import AppSettingsMenu from "@/components/AppSettingsMenu";
+import CorpusSelector from "@/components/corpus-selector";
+import QuerySelector from "@/components/query-selector";
+import PromptBuilder from "@/components/prompt-builder";
+import AnswerPanel from "@/components/answer-panel";
+import ChunkTooltip from "@/components/chunk-tooltip";
+import AppSettingsMenu from "@/components/app-settings-menu";
 
 import { loadCorpus, type Chunk, type Corpus, type CorpusId, type Query } from "@/lib/corpus";
 import { retrieve } from "@/lib/retrieval";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
 
 // R3F canvas must be client-only (no SSR)
-const EmbeddingSpace = dynamic(() => import("@/components/EmbeddingSpace"), { ssr: false });
+const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), { ssr: false });
 
 const DEFAULT_CORPUS: CorpusId = "alice";
 const DEFAULT_ACCENT: AccentId = "orange";
@@ -27,12 +27,12 @@ const SYSTEM_PROMPT =
 // LLM streaming helper
 // ---------------------------------------------------------------------------
 
-async function streamAnswer(
+const streamAnswer = async (
   query: string,
   chunks: Chunk[],
   onChunk: (text: string) => void,
   signal: AbortSignal,
-): Promise<void> {
+): Promise<void> => {
   const context = chunks.map((c, i) => `[${i + 1}] ${c.text}`).join("\n\n");
   const userMessage = `Context:\n${context}\n\nQuestion: ${query}`;
 
@@ -60,13 +60,13 @@ async function streamAnswer(
     if (done) break;
     onChunk(decoder.decode(value, { stream: true }));
   }
-}
+};
 
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
-export default function Home() {
+const Home = () => {
   const [corpusId, setCorpusId] = useState<CorpusId>(DEFAULT_CORPUS);
   const [corpus, setCorpus] = useState<Corpus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -260,4 +260,6 @@ export default function Home() {
       )}
     </div>
   );
-}
+};
+
+export default Home;

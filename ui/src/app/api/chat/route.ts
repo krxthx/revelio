@@ -1,7 +1,7 @@
 import { createLLMAdapter } from "@/lib/llm/factory";
 import type { ChatMessage } from "@/lib/llm/types";
 
-export async function POST(req: Request): Promise<Response> {
+export const POST = async (req: Request): Promise<Response> => {
   let messages: ChatMessage[];
   try {
     const body = await req.json();
@@ -27,4 +27,4 @@ export async function POST(req: Request): Promise<Response> {
     const message = err instanceof Error ? err.message : "Unknown error";
     return new Response(`LLM error: ${message}`, { status: 502 });
   }
-}
+};

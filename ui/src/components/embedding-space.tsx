@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
-import ChunkPoint from "./ChunkPoint";
+import ChunkPoint from "./chunk-point";
 import type { Chunk } from "@/lib/corpus";
 import { COLORS } from "@/lib/theme";
 
@@ -21,13 +21,13 @@ interface Props {
   onHoverChunk: (chunk: Chunk | null) => void;
 }
 
-export default function EmbeddingSpace({
+const EmbeddingSpace = ({
   chunks,
   retrievedIds,
   streaming,
   retrievedColor,
   onHoverChunk,
-}: Props) {
+}: Props) => {
   const hasRetrieval = retrievedIds.size > 0;
 
   return (
@@ -61,4 +61,6 @@ export default function EmbeddingSpace({
       />
     </Canvas>
   );
-}
+};
+
+export default EmbeddingSpace;

@@ -9,7 +9,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export default function QuerySelector({ queries, selectedId, onSelect, disabled }: Props) {
+const QuerySelector = ({ queries, selectedId, onSelect, disabled }: Props) => {
   return (
     <div className="flex flex-col gap-1.5">
       <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -36,4 +36,6 @@ export default function QuerySelector({ queries, selectedId, onSelect, disabled 
       })}
     </div>
   );
-}
+};
+
+export default QuerySelector;

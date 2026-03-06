@@ -30,8 +30,8 @@ export const CORPUS_LABELS: Record<CorpusId, string> = {
 
 export const CORPUS_IDS: CorpusId[] = ["alice", "fastapi", "space"];
 
-export async function loadCorpus(id: CorpusId): Promise<Corpus> {
+export const loadCorpus = async (id: CorpusId): Promise<Corpus> => {
   const res = await fetch(`/data/${id}.json`);
   if (!res.ok) throw new Error(`Failed to load corpus "${id}": ${res.status}`);
   return res.json() as Promise<Corpus>;
-}
+};

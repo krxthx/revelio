@@ -11,7 +11,7 @@ interface Props {
   onClear?: () => void;
 }
 
-export default function AnswerPanel({ query, answer, streaming, retrievedChunks, error, onClear }: Props) {
+const AnswerPanel = ({ query, answer, streaming, retrievedChunks, error, onClear }: Props) => {
   const idle = !query;
 
   return (
@@ -82,4 +82,6 @@ export default function AnswerPanel({ query, answer, streaming, retrievedChunks,
       )}
     </div>
   );
-}
+};
+
+export default AnswerPanel;

@@ -12,13 +12,13 @@ interface Props {
   disabled?: boolean;
 }
 
-export default function AppSettingsMenu({
+const AppSettingsMenu = ({
   topK,
   onTopKChange,
   accentId,
   onAccentChange,
   disabled,
-}: Props) {
+}: Props) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -116,4 +116,6 @@ export default function AppSettingsMenu({
       )}
     </div>
   );
-}
+};
+
+export default AppSettingsMenu;

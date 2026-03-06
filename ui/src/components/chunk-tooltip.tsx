@@ -11,7 +11,7 @@ interface Props {
   chunk: Chunk | null;
 }
 
-export default function ChunkTooltip({ chunk }: Props) {
+const ChunkTooltip = ({ chunk }: Props) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const ref = useRef<HTMLDivElement>(null);
 
@@ -39,4 +39,6 @@ export default function ChunkTooltip({ chunk }: Props) {
       <p className="leading-relaxed">{preview}</p>
     </div>
   );
-}
+};
+
+export default ChunkTooltip;
