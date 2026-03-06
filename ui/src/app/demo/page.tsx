@@ -74,7 +74,15 @@ const Demo = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [topK, setTopK] = useState(5);
+  const [llmModel, setLlmModel] = useState<string | null>(null);
   const { accentId, accentColor, setAccentId } = useAccent();
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((data) => setLlmModel(data.model ?? null))
+      .catch(() => {});
+  }, []);
 
   const [selectedQuery, setSelectedQuery] = useState<Query | null>(null);
   const [selectedWord, setSelectedWord] = useState<Chunk | null>(null);
@@ -191,6 +199,7 @@ const Demo = () => {
             corpusId={corpusId}
             onCorpusChange={handleCorpusChange}
             disabled={loading || streaming}
+            model={llmModel}
           />
         }
       />

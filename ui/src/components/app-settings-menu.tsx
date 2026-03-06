@@ -13,6 +13,7 @@ interface Props {
   corpusId: CorpusId;
   onCorpusChange: (id: CorpusId) => void;
   disabled?: boolean;
+  model?: string | null;
 }
 
 const AppSettingsMenu = ({
@@ -23,6 +24,7 @@ const AppSettingsMenu = ({
   corpusId,
   onCorpusChange,
   disabled,
+  model,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +74,15 @@ const AppSettingsMenu = ({
           <p className="mb-3 text-[11px] text-muted-foreground/75">
             Tune retrieval, corpus, and accent colors.
           </p>
+
+          {model && (
+            <div className="mb-4 rounded-md border border-border bg-muted/50 px-3 py-2">
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Model
+              </p>
+              <p className="truncate font-mono text-xs text-foreground">{model}</p>
+            </div>
+          )}
 
           <div className="mb-4">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
