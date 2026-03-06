@@ -6,16 +6,17 @@ interface Props {
   selected: CorpusId;
   onChange: (id: CorpusId) => void;
   disabled?: boolean;
+  ids?: CorpusId[];
 }
 
-const CorpusSelector = ({ selected, onChange, disabled }: Props) => {
+const CorpusSelector = ({ selected, onChange, disabled, ids = CORPUS_IDS }: Props) => {
   return (
     <div className="flex items-center gap-2">
       <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
         Corpus
       </span>
       <div className="flex gap-1">
-        {CORPUS_IDS.map((id) => (
+        {ids.map((id) => (
           <button
             key={id}
             onClick={() => !disabled && onChange(id)}

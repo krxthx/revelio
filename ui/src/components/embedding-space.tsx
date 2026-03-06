@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense } from "react";
 import ChunkPoint from "./chunk-point";
+import WordGraph from "./word-graph";
 import type { Chunk } from "@/lib/corpus";
 import { COLORS } from "@/lib/theme";
 
@@ -19,6 +20,10 @@ interface Props {
   streaming: boolean;
   retrievedColor: string;
   onHoverChunk: (chunk: Chunk | null) => void;
+  onClickChunk?: (chunk: Chunk) => void;
+  graphCenter?: Chunk;
+  graphNeighbors?: Chunk[];
+  autoRotate?: boolean;
 }
 
 const EmbeddingSpace = ({
@@ -27,6 +32,10 @@ const EmbeddingSpace = ({
   streaming,
   retrievedColor,
   onHoverChunk,
+  onClickChunk,
+  graphCenter,
+  graphNeighbors,
+  autoRotate = true,
 }: Props) => {
   const hasRetrieval = retrievedIds.size > 0;
 
@@ -44,13 +53,22 @@ const EmbeddingSpace = ({
           <ChunkPoint
             key={chunk.id}
             chunk={chunk}
-            isRetrieved={retrievedIds.has(chunk.id)}
+            isRetrieved={retrievedIds.has(chunk.id) && chunk.id !== graphCenter?.id}
+            isCenter={chunk.id === graphCenter?.id}
             isDimmed={hasRetrieval && !retrievedIds.has(chunk.id)}
             streaming={streaming}
             retrievedColor={retrievedColor}
             onHover={onHoverChunk}
+            onClick={onClickChunk}
           />
         ))}
+        {graphCenter && graphNeighbors && graphNeighbors.length > 0 && (
+          <WordGraph
+            center={graphCenter}
+            neighbors={graphNeighbors}
+            color={retrievedColor}
+          />
+        )}
       </Suspense>
 
       <OrbitControls
@@ -58,6 +76,8 @@ const EmbeddingSpace = ({
         dampingFactor={0.05}
         rotateSpeed={0.6}
         zoomSpeed={0.8}
+        autoRotate={autoRotate}
+        autoRotateSpeed={-0.5}
       />
     </Canvas>
   );

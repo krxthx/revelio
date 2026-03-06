@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { Settings2 } from "lucide-react";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
+import { CORPUS_IDS, CORPUS_LABELS, type CorpusId } from "@/lib/corpus";
 
 interface Props {
   topK: number;
   onTopKChange: (value: number) => void;
   accentId: AccentId;
   onAccentChange: (id: AccentId) => void;
+  corpusId: CorpusId;
+  onCorpusChange: (id: CorpusId) => void;
   disabled?: boolean;
 }
 
@@ -17,6 +20,8 @@ const AppSettingsMenu = ({
   onTopKChange,
   accentId,
   onAccentChange,
+  corpusId,
+  onCorpusChange,
   disabled,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -64,6 +69,34 @@ const AppSettingsMenu = ({
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Settings
           </p>
+
+          <div className="mb-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Corpus
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {CORPUS_IDS.map((id) => {
+                const active = id === corpusId;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => onCorpusChange(id)}
+                    disabled={disabled}
+                    className={[
+                      "rounded-md border px-2.5 py-2 text-left text-xs transition-colors",
+                      active
+                        ? "border-primary/50 bg-primary/10 text-foreground"
+                        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+                      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                    ].join(" ")}
+                  >
+                    {CORPUS_LABELS[id]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           <div className="mb-4">
             <div className="mb-2 flex items-center justify-between gap-2">

@@ -3,14 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
-import CorpusSelector from "@/components/corpus-selector";
 import QuerySelector from "@/components/query-selector";
+import WordBrowser from "@/components/word-browser";
 import PromptBuilder from "@/components/prompt-builder";
 import AnswerPanel from "@/components/answer-panel";
+import SimilarWords from "@/components/similar-words";
 import ChunkTooltip from "@/components/chunk-tooltip";
 import AppSettingsMenu from "@/components/app-settings-menu";
 
-import { loadCorpus, type Chunk, type Corpus, type CorpusId, type Query } from "@/lib/corpus";
+import { loadCorpus, isWordCorpus, type Chunk, type Corpus, type CorpusId, type Query } from "@/lib/corpus";
 import { retrieve } from "@/lib/retrieval";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
 
@@ -19,9 +20,13 @@ const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), { s
 
 const DEFAULT_CORPUS: CorpusId = "alice";
 const DEFAULT_ACCENT: AccentId = "orange";
+const ACCENT_STORAGE_KEY = "revelio-accent";
 const SYSTEM_PROMPT =
   "You are a helpful assistant. Answer the question using only the provided context. " +
   "If the context does not contain enough information to answer, say so.";
+
+const isAccentId = (value: string): value is AccentId =>
+  ACCENT_OPTIONS.some((option) => option.id === value);
 
 // ---------------------------------------------------------------------------
 // LLM streaming helper
@@ -76,6 +81,7 @@ const Home = () => {
   const [accentId, setAccentId] = useState<AccentId>(DEFAULT_ACCENT);
 
   const [selectedQuery, setSelectedQuery] = useState<Query | null>(null);
+  const [selectedWord, setSelectedWord] = useState<Chunk | null>(null);
   const [retrievedChunks, setRetrievedChunks] = useState<Chunk[]>([]);
   const [retrievedIds, setRetrievedIds] = useState<Set<string>>(new Set());
 
@@ -90,6 +96,17 @@ const Home = () => {
     ACCENT_OPTIONS.find((option) => option.id === accentId)?.value ?? ACCENT_OPTIONS[0].value;
 
   useEffect(() => {
+    const storedAccent = window.localStorage.getItem(ACCENT_STORAGE_KEY);
+    if (storedAccent && isAccentId(storedAccent)) {
+      setAccentId(storedAccent);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(ACCENT_STORAGE_KEY, accentId);
+  }, [accentId]);
+
+  useEffect(() => {
     document.documentElement.style.setProperty("--primary", accentColor);
   }, [accentColor]);
 
@@ -98,6 +115,7 @@ const Home = () => {
     setLoading(true);
     setLoadError(null);
     setSelectedQuery(null);
+    setSelectedWord(null);
     setRetrievedChunks([]);
     setRetrievedIds(new Set());
     setAnswer("");
@@ -122,11 +140,26 @@ const Home = () => {
   const handleReset = useCallback(() => {
     abortRef.current?.abort();
     setSelectedQuery(null);
+    setSelectedWord(null);
     setRetrievedChunks([]);
     setRetrievedIds(new Set());
     setAnswer("");
     setAnswerError(null);
   }, []);
+
+  const handleWordSelect = useCallback(
+    (word: Chunk) => {
+      if (!corpus) return;
+      setSelectedWord(word);
+      // Retrieve nearest neighbors, excluding the word itself
+      const neighbors = retrieve(word.embedding, corpus.chunks, topK + 1).filter(
+        (c) => c.id !== word.id,
+      );
+      setRetrievedChunks(neighbors);
+      setRetrievedIds(new Set([word.id, ...neighbors.map((c) => c.id)]));
+    },
+    [corpus, topK],
+  );
 
   const handleQuerySelect = useCallback(
     async (query: Query) => {
@@ -175,25 +208,21 @@ const Home = () => {
           <span className="text-sm font-semibold tracking-tight text-foreground">Revelio</span>
           <span className="text-xs text-muted-foreground">RAG Explorer</span>
         </div>
-        <div className="flex items-center gap-3">
-          <CorpusSelector
-            selected={corpusId}
-            onChange={handleCorpusChange}
-            disabled={loading || streaming}
-          />
-          <AppSettingsMenu
-            topK={topK}
-            onTopKChange={setTopK}
-            accentId={accentId}
-            onAccentChange={setAccentId}
-          />
-        </div>
+        <AppSettingsMenu
+          topK={topK}
+          onTopKChange={setTopK}
+          accentId={accentId}
+          onAccentChange={setAccentId}
+          corpusId={corpusId}
+          onCorpusChange={handleCorpusChange}
+          disabled={loading || streaming}
+        />
       </header>
 
       {/* Main layout — desktop: 3-col, mobile: stacked */}
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
-        {/* Left sidebar — query selector */}
-        <aside className="shrink-0 overflow-x-hidden overflow-y-auto border-b border-border px-3 py-4 lg:w-72 lg:border-b-0 lg:border-r">
+        {/* Left sidebar — query selector or word browser */}
+        <aside className="shrink-0 overflow-x-hidden overflow-y-auto border-b border-border px-3 py-4 lg:w-72 lg:border-b-0 lg:border-r lg:flex lg:flex-col">
           {loading ? (
             <div className="flex flex-col gap-1.5">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -203,12 +232,20 @@ const Home = () => {
           ) : loadError ? (
             <p className="text-xs text-destructive">{loadError}</p>
           ) : corpus ? (
-            <QuerySelector
-              queries={corpus.queries}
-              selectedId={selectedQuery?.id ?? null}
-              onSelect={handleQuerySelect}
-              disabled={streaming}
-            />
+            isWordCorpus(corpusId) ? (
+              <WordBrowser
+                words={corpus.chunks}
+                selectedId={selectedWord?.id ?? null}
+                onSelect={handleWordSelect}
+              />
+            ) : (
+              <QuerySelector
+                queries={corpus.queries}
+                selectedId={selectedQuery?.id ?? null}
+                onSelect={handleQuerySelect}
+                disabled={streaming}
+              />
+            )
           ) : null}
         </aside>
 
@@ -221,6 +258,10 @@ const Home = () => {
               streaming={streaming}
               retrievedColor={accentColor}
               onHoverChunk={setHoveredChunk}
+              onClickChunk={isWordCorpus(corpusId) ? handleWordSelect : undefined}
+              graphCenter={isWordCorpus(corpusId) ? selectedWord ?? undefined : undefined}
+              graphNeighbors={isWordCorpus(corpusId) ? retrievedChunks : undefined}
+              autoRotate={!selectedQuery && !selectedWord}
             />
           )}
           {loading && (
@@ -234,20 +275,31 @@ const Home = () => {
           <ChunkTooltip chunk={hoveredChunk} />
         </main>
 
-        {/* Right sidebar — prompt builder + answer; hidden by default on mobile, toggle */}
+        {/* Right sidebar — prompt builder + answer, or similar words for word corpus */}
         <aside className="flex shrink-0 flex-col gap-4 overflow-y-auto border-t border-border px-4 py-4 lg:w-96 lg:border-l lg:border-t-0">
-          <PromptBuilder
-            query={selectedQuery?.text ?? null}
-            retrievedChunks={retrievedChunks}
-          />
-          <AnswerPanel
-            query={selectedQuery?.text ?? null}
-            answer={answer}
-            streaming={streaming}
-            retrievedChunks={retrievedChunks}
-            error={answerError}
-            onClear={selectedQuery && !streaming ? handleReset : undefined}
-          />
+          {isWordCorpus(corpusId) ? (
+            <SimilarWords
+              selectedWord={selectedWord?.text ?? null}
+              similarWords={retrievedChunks}
+              accentColor={accentColor}
+              onClear={selectedWord ? handleReset : undefined}
+            />
+          ) : (
+            <>
+              <PromptBuilder
+                query={selectedQuery?.text ?? null}
+                retrievedChunks={retrievedChunks}
+              />
+              <AnswerPanel
+                query={selectedQuery?.text ?? null}
+                answer={answer}
+                streaming={streaming}
+                retrievedChunks={retrievedChunks}
+                error={answerError}
+                onClear={selectedQuery && !streaming ? handleReset : undefined}
+              />
+            </>
+          )}
         </aside>
       </div>
 
