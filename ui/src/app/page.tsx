@@ -8,14 +8,17 @@ import QuerySelector from "@/components/QuerySelector";
 import PromptBuilder from "@/components/PromptBuilder";
 import AnswerPanel from "@/components/AnswerPanel";
 import ChunkTooltip from "@/components/ChunkTooltip";
+import AppSettingsMenu from "@/components/AppSettingsMenu";
 
 import { loadCorpus, type Chunk, type Corpus, type CorpusId, type Query } from "@/lib/corpus";
 import { retrieve } from "@/lib/retrieval";
+import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
 
 // R3F canvas must be client-only (no SSR)
 const EmbeddingSpace = dynamic(() => import("@/components/EmbeddingSpace"), { ssr: false });
 
 const DEFAULT_CORPUS: CorpusId = "alice";
+const DEFAULT_ACCENT: AccentId = "orange";
 const SYSTEM_PROMPT =
   "You are a helpful assistant. Answer the question using only the provided context. " +
   "If the context does not contain enough information to answer, say so.";
@@ -70,6 +73,7 @@ export default function Home() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [topK, setTopK] = useState(5);
+  const [accentId, setAccentId] = useState<AccentId>(DEFAULT_ACCENT);
 
   const [selectedQuery, setSelectedQuery] = useState<Query | null>(null);
   const [retrievedChunks, setRetrievedChunks] = useState<Chunk[]>([]);
@@ -82,6 +86,12 @@ export default function Home() {
   const [answerError, setAnswerError] = useState<string | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
+  const accentColor =
+    ACCENT_OPTIONS.find((option) => option.id === accentId)?.value ?? ACCENT_OPTIONS[0].value;
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--primary", accentColor);
+  }, [accentColor]);
 
   // Load corpus whenever corpusId changes
   useEffect(() => {
@@ -165,33 +175,25 @@ export default function Home() {
           <span className="text-sm font-semibold tracking-tight text-foreground">Revelio</span>
           <span className="text-xs text-muted-foreground">RAG Explorer</span>
         </div>
-        <CorpusSelector
-          selected={corpusId}
-          onChange={handleCorpusChange}
-          disabled={loading || streaming}
-        />
+        <div className="flex items-center gap-3">
+          <CorpusSelector
+            selected={corpusId}
+            onChange={handleCorpusChange}
+            disabled={loading || streaming}
+          />
+          <AppSettingsMenu
+            topK={topK}
+            onTopKChange={setTopK}
+            accentId={accentId}
+            onAccentChange={setAccentId}
+          />
+        </div>
       </header>
 
       {/* Main layout — desktop: 3-col, mobile: stacked */}
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
         {/* Left sidebar — query selector */}
         <aside className="shrink-0 overflow-x-hidden overflow-y-auto border-b border-border px-3 py-4 lg:w-72 lg:border-b-0 lg:border-r">
-          {/* Top K control */}
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Top K
-            </span>
-            <input
-              type="range"
-              min={1}
-              max={10}
-              value={topK}
-              onChange={(e) => setTopK(Number(e.target.value))}
-              className="flex-1 accent-primary"
-            />
-            <span className="w-4 shrink-0 text-right text-xs text-foreground">{topK}</span>
-          </div>
-
           {loading ? (
             <div className="flex flex-col gap-1.5">
               {Array.from({ length: 10 }).map((_, i) => (
@@ -217,6 +219,7 @@ export default function Home() {
               chunks={corpus.chunks}
               retrievedIds={retrievedIds}
               streaming={streaming}
+              retrievedColor={accentColor}
               onHoverChunk={setHoveredChunk}
             />
           )}

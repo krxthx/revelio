@@ -17,10 +17,17 @@ interface Props {
   chunks: Chunk[];
   retrievedIds: Set<string>;
   streaming: boolean;
+  retrievedColor: string;
   onHoverChunk: (chunk: Chunk | null) => void;
 }
 
-export default function EmbeddingSpace({ chunks, retrievedIds, streaming, onHoverChunk }: Props) {
+export default function EmbeddingSpace({
+  chunks,
+  retrievedIds,
+  streaming,
+  retrievedColor,
+  onHoverChunk,
+}: Props) {
   const hasRetrieval = retrievedIds.size > 0;
 
   return (
@@ -40,6 +47,7 @@ export default function EmbeddingSpace({ chunks, retrievedIds, streaming, onHove
             isRetrieved={retrievedIds.has(chunk.id)}
             isDimmed={hasRetrieval && !retrievedIds.has(chunk.id)}
             streaming={streaming}
+            retrievedColor={retrievedColor}
             onHover={onHoverChunk}
           />
         ))}

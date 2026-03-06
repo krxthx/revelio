@@ -18,10 +18,18 @@ interface Props {
   isRetrieved: boolean;
   isDimmed: boolean;
   streaming: boolean;
+  retrievedColor: string;
   onHover: (chunk: Chunk | null) => void;
 }
 
-export default function ChunkPoint({ chunk, isRetrieved, isDimmed, streaming, onHover }: Props) {
+export default function ChunkPoint({
+  chunk,
+  isRetrieved,
+  isDimmed,
+  streaming,
+  retrievedColor,
+  onHover,
+}: Props) {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -41,7 +49,7 @@ export default function ChunkPoint({ chunk, isRetrieved, isDimmed, streaming, on
   });
 
   const color = isRetrieved
-    ? POINT_COLORS.retrieved
+    ? retrievedColor
     : hovered
     ? POINT_COLORS.hovered
     : isDimmed

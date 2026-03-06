@@ -14,11 +14,20 @@ export const COLORS = {
   destructive:     "#f87171",
 } as const;
 
+export const ACCENT_OPTIONS = [
+  { id: "orange", label: "Orange", value: "#f97316" },
+  { id: "teal", label: "Teal", value: "#14b8a6" },
+  { id: "sky", label: "Sky", value: "#38bdf8" },
+  { id: "lilac", label: "Lilac", value: "#a78bfa" },
+  { id: "pink", label: "Pink", value: "#f472b6" },
+] as const;
+
+export type AccentId = (typeof ACCENT_OPTIONS)[number]["id"];
+
 /** Three.js sphere colors */
 export const POINT_COLORS = {
   default:   "#a1a1aa",              /* zinc-400 — clearly visible on dark bg */
   hovered:   COLORS.foreground,
-  retrieved: COLORS.primary,
   dimmed:    "#71717a",              /* zinc-500 — de-emphasised but still legible */
 } as const;
 
