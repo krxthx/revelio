@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Design tokens
+   All colours live here. Components use Tailwind utility classes derived
+   from these — bg-background, text-foreground, text-muted-foreground, etc.
+--------------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surface */
+  --background:           #0a0a0a;
+  --foreground:           #f4f4f5;    /* zinc-100 */
+
+  /* Subtle surfaces */
+  --muted:                #18181b;    /* zinc-900 */
+  --muted-foreground:     #71717a;    /* zinc-500 */
+
+  /* Accent / primary */
+  --primary:              #f97316;    /* orange-500 */
+  --primary-foreground:   #ffffff;
+
+  /* Borders */
+  --border:               rgba(255, 255, 255, 0.06);
+
+  /* Cards / panels */
+  --card:                 #18181b;
+
+  /* Status */
+  --destructive:          #f87171;    /* red-400 */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background:        var(--background);
+  --color-foreground:        var(--foreground);
+  --color-muted:             var(--muted);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-primary:           var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-border:            var(--border);
+  --color-card:              var(--card);
+  --color-destructive:       var(--destructive);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
