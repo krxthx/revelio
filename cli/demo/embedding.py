@@ -2,11 +2,11 @@
 
 from sentence_transformers import SentenceTransformer
 
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+DEFAULT_MODEL = "all-MiniLM-L6-v2"
 BATCH_SIZE = 64
 
 
-def load_model(model_name: str = EMBEDDING_MODEL) -> SentenceTransformer:
+def load_model(model_name: str = DEFAULT_MODEL) -> SentenceTransformer:
     return SentenceTransformer(model_name)
 
 

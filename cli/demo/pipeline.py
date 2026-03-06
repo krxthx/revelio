@@ -6,7 +6,7 @@ from pathlib import Path
 from sentence_transformers import SentenceTransformer
 
 from .chunking import chunk_text
-from .embedding import embed, EMBEDDING_MODEL
+from .embedding import embed
 from .projection import project, normalize
 
 QUERIES_FILE = Path(__file__).parent.parent.parent / "data" / "queries.json"
@@ -17,6 +17,7 @@ def prepare_corpus(
     corpus_name: str,
     input_path: Path,
     model: SentenceTransformer,
+    model_name: str,
     output_dir: Path = OUTPUT_DIR,
 ) -> Path:
     """
@@ -69,7 +70,7 @@ def prepare_corpus(
 
     output = {
         "corpus": corpus_name,
-        "model": EMBEDDING_MODEL,
+        "model": model_name,
         "chunks": chunks,
         "queries": queries,
     }

@@ -10,7 +10,9 @@ Output: ui/public/data/words.json
 import json
 from pathlib import Path
 
-from .embedding import embed, load_model, EMBEDDING_MODEL
+from .embedding import embed, load_model
+
+DEFAULT_MODEL = "BAAI/bge-base-en-v1.5"
 from .projection import project, normalize
 
 OUTPUT_PATH = Path(__file__).parent.parent.parent / "ui" / "public" / "data" / "words.json"
@@ -136,10 +138,10 @@ for w in WORD_LIST:
         WORDS.append(wl)
 
 
-def generate_words_corpus() -> None:
+def generate_words_corpus(model_name: str = DEFAULT_MODEL) -> None:
     print(f"[words] {len(WORDS)} unique words")
-    print("[words] Loading model…")
-    model = load_model()
+    print(f"[words] Loading model: {model_name}")
+    model = load_model(model_name)
 
     print("[words] Embedding…")
     embeddings = embed(WORDS, model)
@@ -161,7 +163,7 @@ def generate_words_corpus() -> None:
 
     output = {
         "corpus": "words",
-        "model": EMBEDDING_MODEL,
+        "model": model_name,
         "chunks": chunks,
         "queries": [],
     }
