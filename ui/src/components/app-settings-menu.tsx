@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Settings2 } from "lucide-react";
+import { Settings2, X } from "lucide-react";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
 import { CORPUS_IDS, CORPUS_LABELS, type CorpusId } from "@/lib/corpus";
 import {
@@ -107,12 +107,24 @@ const AppSettingsMenu = ({
 
       {open && (
         <div className="absolute right-0 top-11 z-50 w-64 rounded-lg border border-border bg-card p-3 shadow-xl">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Settings
-          </p>
-          <p className="mb-3 text-[11px] text-muted-foreground/75">
-            Tune retrieval, corpus, and accent colors.
-          </p>
+          <div className="mb-3 flex items-start justify-between gap-2">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Settings
+              </p>
+              <p className="text-[11px] text-muted-foreground/75">
+                Tune retrieval, corpus, and accent colors.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label="Close settings"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
 
           <div className="mb-4">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">

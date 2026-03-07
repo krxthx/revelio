@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import NavBar from "@/components/nav-bar";
@@ -30,7 +30,7 @@ import {
   fetchLLMConfigSummary,
   streamChatResponse,
 } from "@/lib/llm/client";
-import { retrieve, retrieveMMR, type RetrievalMode } from "@/lib/retrieval";
+import { retrieve, retrieveMMR, type RetrievalMode, type ScoredChunk } from "@/lib/retrieval";
 
 // R3F canvas must be client-only (no SSR)
 const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), {
@@ -63,8 +63,24 @@ const Demo = () => {
 
   const [selectedQuery, setSelectedQuery] = useState<Query | null>(null);
   const [selectedWord, setSelectedWord] = useState<Chunk | null>(null);
-  const [retrievedChunks, setRetrievedChunks] = useState<Chunk[]>([]);
+  const [retrievedChunks, setRetrievedChunks] = useState<ScoredChunk[]>([]);
   const [retrievedIds, setRetrievedIds] = useState<Set<string>>(new Set());
+
+  // Min-max normalized scores [0, 1] per chunk id — so 3D color matches ranking
+  const retrievedScores = useMemo(() => {
+    const map = new Map<string, number>();
+    if (retrievedChunks.length === 0) return map;
+    const scores = retrievedChunks.map((s) => s.score);
+    const minScore = Math.min(...scores);
+    const maxScore = Math.max(...scores);
+    const range = maxScore - minScore;
+    for (const { chunk, score } of retrievedChunks) {
+      // Normalize to [0.25, 1] so even the lowest scorer is clearly visible
+      const t = range > 0.005 ? (score - minScore) / range : 1;
+      map.set(chunk.id, 0.25 + t * 0.75);
+    }
+    return map;
+  }, [retrievedChunks]);
 
   const [hoveredChunk, setHoveredChunk] = useState<Chunk | null>(null);
 
@@ -105,7 +121,7 @@ const Demo = () => {
     if (!corpus || !selectedQuery) return;
     const top = doRetrieve(selectedQuery.embedding, corpus.chunks, topK);
     setRetrievedChunks(top);
-    setRetrievedIds(new Set(top.map((c) => c.id)));
+    setRetrievedIds(new Set(top.map((s) => s.chunk.id)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topK, retrievalMode]);
 
@@ -125,10 +141,10 @@ const Demo = () => {
       setSelectedWord(word);
       // Retrieve nearest neighbors, excluding the word itself
       const neighbors = doRetrieve(word.embedding, corpus.chunks, topK + 1).filter(
-        (c) => c.id !== word.id,
+        (s) => s.chunk.id !== word.id,
       );
       setRetrievedChunks(neighbors);
-      setRetrievedIds(new Set([word.id, ...neighbors.map((c) => c.id)]));
+      setRetrievedIds(new Set([word.id, ...neighbors.map((s) => s.chunk.id)]));
     },
     [corpus, topK, doRetrieve],
   );
@@ -147,8 +163,8 @@ const Demo = () => {
 
       const top = doRetrieve(query.embedding, corpus.chunks, topK);
       setRetrievedChunks(top);
-      setRetrievedIds(new Set(top.map((c) => c.id)));
-      const messages = buildRagMessages(query.text, top);
+      setRetrievedIds(new Set(top.map((s) => s.chunk.id)));
+      const messages = buildRagMessages(query.text, top.map((s) => s.chunk));
 
       setStreaming(true);
       try {
@@ -174,7 +190,20 @@ const Demo = () => {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
+    <div className="relative flex h-screen flex-col bg-background text-foreground overflow-hidden">
+      {/* Atmosphere overlay — mirrors the landing page but more subdued */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage: `
+            radial-gradient(ellipse 55% 35% at 15% 5%, color-mix(in srgb, ${accentColor} 10%, transparent), transparent),
+            radial-gradient(ellipse 45% 30% at 85% 8%, color-mix(in srgb, ${accentColor} 7%, transparent), transparent),
+            radial-gradient(ellipse 35% 40% at 50% 95%, color-mix(in srgb, ${accentColor} 5%, transparent), transparent)
+          `,
+        }}
+      />
+      <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
       <NavBar
         rightSlot={
           <AppSettingsMenu
@@ -234,6 +263,7 @@ const Demo = () => {
             <EmbeddingSpace
               chunks={corpus.chunks}
               retrievedIds={retrievedIds}
+              retrievedScores={retrievedScores}
               streaming={streaming}
               retrievedColor={accentColor}
               onHoverChunk={setHoveredChunk}
@@ -244,7 +274,7 @@ const Demo = () => {
                 isWordCorpus(corpusId) ? (selectedWord ?? undefined) : undefined
               }
               graphNeighbors={
-                isWordCorpus(corpusId) ? retrievedChunks : undefined
+                isWordCorpus(corpusId) ? retrievedChunks.map((s) => s.chunk) : undefined
               }
               autoRotate={!selectedQuery && !selectedWord}
             />
@@ -286,6 +316,8 @@ const Demo = () => {
             </>
           )}
         </aside>
+      </div>
+
       </div>
 
       {/* Streaming toast - fixed bottom-center */}

@@ -1,10 +1,10 @@
 "use client";
 
-import type { Chunk } from "@/lib/corpus";
+import type { ScoredChunk } from "@/lib/retrieval";
 
 interface Props {
   selectedWord: string | null;
-  similarWords: Chunk[];
+  similarWords: ScoredChunk[];
   accentColor: string;
   onClear?: () => void;
 }
@@ -47,19 +47,26 @@ const SimilarWords = ({ selectedWord, similarWords, accentColor, onClear }: Prop
           </button>
         )}
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {similarWords.map((w, i) => (
-          <span
+      <div className="flex flex-wrap gap-2">
+        {similarWords.map(({ chunk: w, score }) => (
+          <div
             key={w.id}
-            className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-            style={{
-              backgroundColor: `${accentColor}${Math.round((1 - i / similarWords.length) * 0.18 * 255).toString(16).padStart(2, "0")}`,
-              color: accentColor,
-              border: `1px solid ${accentColor}30`,
-            }}
+            className="flex flex-col items-center gap-0.5"
           >
-            {w.text}
-          </span>
+            <span
+              className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+              style={{
+                backgroundColor: `${accentColor}20`,
+                color: accentColor,
+                border: `1px solid ${accentColor}30`,
+              }}
+            >
+              {w.text}
+            </span>
+            <span className="font-mono text-[10px] text-muted-foreground/60">
+              {score.toFixed(3)}
+            </span>
+          </div>
         ))}
       </div>
     </div>

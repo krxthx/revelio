@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { Mesh } from "three";
+import { Color, type Mesh } from "three";
 import type { Chunk } from "@/lib/corpus";
-import { POINT_COLORS, POINT_OPACITY, POINT_RADIUS } from "@/lib/theme";
+import { COLORS, POINT_COLORS, POINT_OPACITY, POINT_RADIUS } from "@/lib/theme";
 
 const SCALE_DEFAULT = 0.75;
 const SCALE_HOVERED = 0.85;
@@ -14,6 +14,13 @@ const SCALE_LERP_SPEED = 8;
 const PULSE_SPEED = 0.004;
 const PULSE_AMPLITUDE = 0.05;
 
+/** Lerp between dim base and full accent based on normalized score [0, 1]. */
+const scoreToColor = (accentHex: string, t: number): string => {
+  const accent = new Color(accentHex);
+  const dim = new Color(COLORS.mutedForeground);
+  return "#" + dim.clone().lerp(accent, t).getHexString();
+};
+
 interface Props {
   chunk: Chunk;
   isRetrieved: boolean;
@@ -21,6 +28,8 @@ interface Props {
   isDimmed: boolean;
   streaming: boolean;
   retrievedColor: string;
+  /** Normalized similarity score in [0, 1] — 1 = highest in the retrieved set. */
+  retrievalScore?: number;
   onHover: (chunk: Chunk | null) => void;
   onClick?: (chunk: Chunk) => void;
 }
@@ -32,6 +41,7 @@ const ChunkPoint = ({
   isDimmed,
   streaming,
   retrievedColor,
+  retrievalScore,
   onHover,
   onClick,
 }: Props) => {
@@ -55,10 +65,16 @@ const ChunkPoint = ({
     meshRef.current.scale.setScalar(next * pulse);
   });
 
+  // Score-graded color: lerp dim → accent based on normalized score
+  const scoredColor = useMemo(() => {
+    if (!isRetrieved || retrievalScore === undefined) return retrievedColor;
+    return scoreToColor(retrievedColor, retrievalScore);
+  }, [isRetrieved, retrievalScore, retrievedColor]);
+
   const color = isCenter
     ? "#ffffff"
     : isRetrieved
-    ? retrievedColor
+    ? scoredColor
     : hovered
     ? POINT_COLORS.hovered
     : isDimmed
@@ -72,6 +88,10 @@ const ChunkPoint = ({
     : isDimmed
     ? POINT_OPACITY.dimmed
     : POINT_OPACITY.default;
+
+  const emissiveIntensity = isRetrieved && retrievalScore !== undefined
+    ? retrievalScore * 0.25
+    : 0;
 
   return (
     <mesh
@@ -88,6 +108,8 @@ const ChunkPoint = ({
         transparent
         roughness={0.4}
         metalness={0.1}
+        emissive={isRetrieved ? scoredColor : "#000000"}
+        emissiveIntensity={emissiveIntensity}
       />
     </mesh>
   );

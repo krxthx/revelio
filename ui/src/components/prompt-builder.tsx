@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Chunk } from "@/lib/corpus";
+import type { ScoredChunk } from "@/lib/retrieval";
 
 const SYSTEM_PROMPT =
   "You are a helpful assistant. Answer the question using only the provided context. " +
@@ -9,13 +9,8 @@ const SYSTEM_PROMPT =
 
 interface Props {
   query: string | null;
-  retrievedChunks: Chunk[];
+  retrievedChunks: ScoredChunk[];
 }
-
-const buildPrompt = (query: string, chunks: Chunk[]): string => {
-  const context = chunks.map((c, i) => `[${i + 1}] ${c.text}`).join("\n\n");
-  return `Context:\n${context}\n\nQuestion: ${query}`;
-};
 
 const PromptBuilder = ({ query, retrievedChunks }: Props) => {
   const [open, setOpen] = useState(false);
@@ -44,7 +39,7 @@ const PromptBuilder = ({ query, retrievedChunks }: Props) => {
               <PromptSection label="system" color="text-blue-400">
                 {SYSTEM_PROMPT}
               </PromptSection>
-              {retrievedChunks.map((chunk, i) => (
+              {retrievedChunks.map(({ chunk }, i) => (
                 <PromptSection key={chunk.id} label={`context [${i + 1}]`} color="text-primary">
                   {chunk.text}
                 </PromptSection>
@@ -77,6 +72,4 @@ const PromptSection = ({
   );
 };
 
-// Keep buildPrompt available for external use
-export { buildPrompt };
 export default PromptBuilder;

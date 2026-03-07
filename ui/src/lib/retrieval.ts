@@ -6,6 +6,12 @@ const MMR_LAMBDA = 0.5;
 
 export type RetrievalMode = "cosine" | "mmr";
 
+export interface ScoredChunk {
+  chunk: Chunk;
+  /** Cosine similarity between the query and this chunk (0–1). */
+  score: number;
+}
+
 export const cosineSimilarity = (a: number[], b: number[]): number => {
   let dot = 0;
   let magA = 0;
@@ -23,52 +29,49 @@ export const retrieve = (
   queryEmbedding: number[],
   chunks: Chunk[],
   topK: number = TOP_K,
-): Chunk[] => {
+): ScoredChunk[] => {
   const scored = chunks.map((chunk) => ({
     chunk,
     score: cosineSimilarity(queryEmbedding, chunk.embedding),
   }));
   scored.sort((a, b) => b.score - a.score);
-  return scored
-    .slice(0, topK)
-    .filter((s) => s.score >= SIMILARITY_THRESHOLD)
-    .map((s) => s.chunk);
+  return scored.slice(0, topK).filter((s) => s.score >= SIMILARITY_THRESHOLD);
 };
 
 export const retrieveMMR = (
   queryEmbedding: number[],
   chunks: Chunk[],
   topK: number = TOP_K,
-): Chunk[] => {
+): ScoredChunk[] => {
   const candidates = chunks
     .map((chunk) => ({
       chunk,
-      queryScore: cosineSimilarity(queryEmbedding, chunk.embedding),
+      score: cosineSimilarity(queryEmbedding, chunk.embedding),
     }))
-    .filter((c) => c.queryScore >= SIMILARITY_THRESHOLD);
+    .filter((c) => c.score >= SIMILARITY_THRESHOLD);
 
-  const selected: Chunk[] = [];
+  const selected: ScoredChunk[] = [];
 
   while (selected.length < topK && candidates.length > 0) {
     let bestIdx = -1;
-    let bestScore = -Infinity;
+    let bestMMR = -Infinity;
 
     for (let i = 0; i < candidates.length; i++) {
-      const { chunk, queryScore } = candidates[i];
+      const { chunk, score } = candidates[i];
       const maxSimilarityToSelected =
         selected.length === 0
           ? 0
-          : Math.max(...selected.map((s) => cosineSimilarity(chunk.embedding, s.embedding)));
+          : Math.max(...selected.map((s) => cosineSimilarity(chunk.embedding, s.chunk.embedding)));
 
-      const mmrScore = MMR_LAMBDA * queryScore - (1 - MMR_LAMBDA) * maxSimilarityToSelected;
-      if (mmrScore > bestScore) {
-        bestScore = mmrScore;
+      const mmrScore = MMR_LAMBDA * score - (1 - MMR_LAMBDA) * maxSimilarityToSelected;
+      if (mmrScore > bestMMR) {
+        bestMMR = mmrScore;
         bestIdx = i;
       }
     }
 
     if (bestIdx === -1) break;
-    selected.push(candidates[bestIdx].chunk);
+    selected.push(candidates[bestIdx]);
     candidates.splice(bestIdx, 1);
   }
 
