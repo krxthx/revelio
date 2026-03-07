@@ -2,12 +2,14 @@
 
 An interactive RAG (Retrieval-Augmented Generation) explorer that visualizes text embeddings in 3D space and lets you see how semantic search works under the hood.
 
-## What it does
+## What it shows
 
-- **Explore embedding space** — view text chunks or words as points in a 3D scatter plot, color-coded by semantic similarity
-- **Run semantic search** — select a pre-built query and watch the top-K nearest chunks highlight in the visualization
-- **See the full RAG pipeline** — inspect the retrieved context, the constructed prompt, and stream a live LLM answer
-- **Browse word embeddings** — switch to the "Word Embeddings" corpus to explore how ~2000 common English words cluster by meaning, and find nearest neighbors for any word
+- **3D embedding space** — document chunks visualized using UMAP projection. Semantically similar chunks cluster together.
+- **Semantic retrieval** — select a query, watch the most relevant chunks highlight in real time.
+- **Retrieval modes** — toggle between Cosine and MMR to compare how retrieval strategy changes results.
+- **Prompt assembly** — see exactly how retrieved chunks get assembled into the LLM prompt.
+- **Streamed answer** — the LLM generates a response grounded in the retrieved context.
+- **Word embeddings** — switch to the "Word Embeddings" corpus to explore how ~2000 common English words cluster by meaning.
 
 ## Architecture
 
@@ -34,18 +36,9 @@ revelio/
         │   └── answer-panel.tsx     # Streams LLM answer
         └── lib/
             ├── corpus.ts      # Corpus loading + types
-            ├── retrieval.ts   # Cosine similarity search (client-side)
+            ├── retrieval.ts   # Cosine similarity + MMR (client-side)
             └── llm/           # OpenAI-compatible LLM adapter
 ```
-
-## Available corpora
-
-| ID | Label | Description |
-|----|-------|-------------|
-| `alice` | Alice in Wonderland | Classic novel chunks |
-| `fastapi` | FastAPI Docs | Framework documentation |
-| `space` | Space Exploration | Space-related text |
-| `words` | Word Embeddings | ~2000 common English words |
 
 ## Setup
 
@@ -56,19 +49,14 @@ cd cli
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Generate a single corpus
-python -m demo --corpus alice
-
 # Generate all corpora
 python -m demo --all
 
-# Use a custom embedding model
-python -m demo --corpus fastapi --model sentence-transformers/all-mpnet-base-v2
+# Or a single corpus
+python -m demo --corpus alice
 ```
 
-Default models:
-- Text corpora: `all-MiniLM-L6-v2`
-- Word embeddings: `BAAI/bge-base-en-v1.5`
+Default embedding model: `all-MiniLM-L6-v2` (text corpora), `BAAI/bge-base-en-v1.5` (words).
 
 Output is written to `ui/public/data/{corpus}.json`.
 
@@ -78,11 +66,11 @@ The UI calls any OpenAI-compatible API. Create `ui/.env.local`:
 
 ```bash
 LLM_BASE_URL=https://openrouter.ai/api/v1   # or http://localhost:11434/v1 for Ollama
-LLM_MODEL=mistralai/mistral-7b-instruct:free
+LLM_MODEL=qwen/qwen-2.5-7b-instruct
 LLM_API_KEY=your_api_key
 ```
 
-Defaults to [OpenRouter](https://openrouter.ai) with `mistralai/mistral-7b-instruct:free` (free tier, no key required).
+You can also switch providers at runtime from the settings menu in the UI.
 
 ### 3. Run the UI
 
@@ -94,11 +82,52 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Recommended models
+
+Smaller instruction-following models tend to work better for RAG than large RLHF-trained ones — they follow the system prompt more faithfully and avoid over-hedging when context is provided.
+
+| Model | Via | Notes |
+|---|---|---|
+| `qwen/qwen-2.5-7b-instruct` | OpenRouter (free) | Best free option — concise, direct answers |
+| `meta-llama/llama-3.1-8b-instruct` | OpenRouter | Solid, widely supported |
+| `mistralai/mistral-7b-instruct:free` | OpenRouter (free) | Good baseline |
+| `qwen2.5:7b` | Ollama (local) | Same model, runs fully offline |
+
+## Retrieval modes
+
+**Cosine similarity** — ranks all chunks by vector similarity to the query and returns the top K. Fast and straightforward. Can return redundant results if the document has repeated content.
+
+**MMR (Maximal Marginal Relevance)** — picks chunks that are both relevant to the query *and* different from each other. After selecting the first chunk (highest similarity), each subsequent pick is penalized if it's too similar to an already-selected chunk. Useful when you want broader topic coverage. Configured with λ=0.5 (equal weight to relevance and diversity).
+
+In practice: cosine is the default in most RAG systems. MMR is worth trying when your top results all cover the same passage.
+
+Both modes apply a similarity threshold of 0.3 — chunks below this score are excluded regardless of K.
+
+## A note on the 3D visualization
+
+The embedding space uses UMAP to project 384-dimensional vectors down to 3D for display. UMAP is lossy — nearby points in 3D are genuinely semantically related, but exact distances aren't preserved. **Retrieval runs on the full 384-dim embeddings**, not the projected coordinates. The 3D view is for building intuition, not for retrieval.
+
+## Corpora
+
+| ID | Label | Description |
+|----|-------|-------------|
+| `alice` | Alice in Wonderland | Classic novel — loose semantic clusters by theme and character |
+| `fastapi` | FastAPI Docs | Framework documentation — tight clusters by feature area |
+| `space` | Space Exploration | Factual text — broad topic spread, mixed density |
+| `words` | Word Embeddings | ~2000 common English words |
+
 ## Tech stack
 
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS v4
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **3D visualization**: Three.js, React Three Fiber, Drei
 - **Embeddings**: sentence-transformers (Python)
 - **Dimensionality reduction**: UMAP (3D projection)
-- **LLM backend**: Any OpenAI-compatible API (OpenRouter, Ollama, etc.)
-- **Retrieval**: Client-side cosine similarity search
+- **LLM backend**: Any OpenAI-compatible API (OpenRouter, Ollama, LM Studio, vLLM)
+- **Retrieval**: Client-side cosine similarity and MMR
+
+## Future ideas
+
+- **Phase 2 CLI** — ingest your own documents and run RAG on them locally
+- **Chunking visualizer** — compare fixed-size vs sentence vs semantic chunking side by side
+- **BM25 vs semantic** — keyword vs embedding retrieval comparison
+- **Token visualizer** — see how text and images get tokenized across different models

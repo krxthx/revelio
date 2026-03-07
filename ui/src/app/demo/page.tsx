@@ -37,7 +37,7 @@ const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), {
   ssr: false,
 });
 
-const DEFAULT_CORPUS: CorpusId = "alice";
+const DEFAULT_CORPUS: CorpusId = "words";
 
 // ---------------------------------------------------------------------------
 // Page
