@@ -141,6 +141,10 @@ const AppSettingsMenu = ({
               })}
             </div>
 
+            <p className="mt-2 text-[10px] text-muted-foreground/60">
+              BYOK recommended - free models have rate limits.
+            </p>
+
             {llmConfig.provider === "env" ? (
               <div className="mt-3 rounded-md border border-border bg-muted/50 px-3 py-2">
                 <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">

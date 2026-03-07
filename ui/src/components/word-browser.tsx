@@ -54,7 +54,7 @@ const WordBrowser = ({ words, selectedId, onSelect }: Props) => {
         })}
         {filtered.length > 200 && (
           <p className="px-3 py-2 text-[11px] text-muted-foreground">
-            Showing 200 of {filtered.length.toLocaleString()} — type to narrow
+            Showing 200 of {filtered.length.toLocaleString()} - type to narrow
           </p>
         )}
       </div>

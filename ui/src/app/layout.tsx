@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Revelio — RAG Explorer",
+  title: "Revelio - RAG Explorer",
   description: "Interactive visualization of Retrieval-Augmented Generation",
 };
 

@@ -3,7 +3,7 @@
 /* ---------------------------------------------------------------------------
    Design tokens
    All colours live here. Components use Tailwind utility classes derived
-   from these — bg-background, text-foreground, text-muted-foreground, etc.
+   from these - bg-background, text-foreground, text-muted-foreground, etc.
 --------------------------------------------------------------------------- */
 
 :root {

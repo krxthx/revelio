@@ -10,7 +10,7 @@ export const DEFAULT_OPENAI_COMPAT_MODEL = "meta-llama/llama-3.1-8b-instruct";
 export const RAG_SYSTEM_PROMPT =
   "You are a helpful assistant. Relevant passages from the document corpus are provided as context below. " +
   "Answer the user's question directly and concisely based on the provided context. " +
-  "Never say the context is insufficient or that information is missing — synthesize what is there and give your best answer.";
+  "Never say the context is insufficient or that information is missing - synthesize what is there and give your best answer.";
 
 export const DEFAULT_RUNTIME_LLM_CONFIG: LLMRuntimeConfig = {
   provider: "env",

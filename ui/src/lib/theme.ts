@@ -1,7 +1,7 @@
 /**
  * Runtime theme constants.
  * These mirror globals.css and are used wherever CSS variables aren't
- * available — primarily Three.js materials.
+ * available - primarily Three.js materials.
  */
 
 export const COLORS = {
@@ -26,9 +26,9 @@ export type AccentId = (typeof ACCENT_OPTIONS)[number]["id"];
 
 /** Three.js sphere colors */
 export const POINT_COLORS = {
-  default:   "#a1a1aa",              /* zinc-400 — clearly visible on dark bg */
+  default:   "#a1a1aa",              /* zinc-400 - clearly visible on dark bg */
   hovered:   COLORS.foreground,
-  dimmed:    "#71717a",              /* zinc-500 — de-emphasised but still legible */
+  dimmed:    "#71717a",              /* zinc-500 - de-emphasised but still legible */
 } as const;
 
 export const POINT_OPACITY = {

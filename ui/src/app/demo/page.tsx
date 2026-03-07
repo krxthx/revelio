@@ -195,9 +195,9 @@ const Demo = () => {
         }
       />
 
-      {/* Main layout — desktop: 3-col, mobile: stacked */}
+      {/* Main layout - desktop: 3-col, mobile: stacked */}
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
-        {/* Left sidebar — query selector or word browser */}
+        {/* Left sidebar - query selector or word browser */}
         <aside className="shrink-0 overflow-x-hidden overflow-y-auto border-b border-border px-3 py-4 lg:w-72 lg:border-b-0 lg:border-r lg:flex lg:flex-col">
           {loading ? (
             <div className="flex flex-col gap-1.5">
@@ -228,7 +228,7 @@ const Demo = () => {
           ) : null}
         </aside>
 
-        {/* Centre — 3D embedding space */}
+        {/* Centre - 3D embedding space */}
         <main className="relative h-[40vh] shrink-0 lg:h-auto lg:flex-1">
           {corpus && (
             <EmbeddingSpace
@@ -260,7 +260,7 @@ const Demo = () => {
           <ChunkTooltip chunk={hoveredChunk} />
         </main>
 
-        {/* Right sidebar — prompt builder + answer, or similar words for word corpus */}
+        {/* Right sidebar - prompt builder + answer, or similar words for word corpus */}
         <aside className="flex shrink-0 flex-col gap-4 overflow-y-auto border-t border-border px-4 py-4 lg:w-96 lg:border-l lg:border-t-0">
           {isWordCorpus(corpusId) ? (
             <SimilarWords
@@ -288,7 +288,7 @@ const Demo = () => {
         </aside>
       </div>
 
-      {/* Streaming toast — fixed bottom-center */}
+      {/* Streaming toast - fixed bottom-center */}
       {streaming && (
         <div className="fixed bottom-5 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2.5 rounded-full border border-primary/20 bg-card px-4 py-2.5 shadow-lg">
           <span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />

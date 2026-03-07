@@ -91,6 +91,12 @@ export const POST = async (req: Request): Promise<Response> => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    if (message === "rate_limit") {
+      return new Response(
+        "Rate limited by provider. Add your own API key in Settings for higher limits.",
+        { status: 429 },
+      );
+    }
     return new Response(`LLM error: ${message}`, { status: 502 });
   }
 };

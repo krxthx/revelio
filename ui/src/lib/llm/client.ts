@@ -51,6 +51,9 @@ export const streamChatResponse = async ({
 
   if (!response.ok) {
     const body = await response.text();
+    if (response.status === 429) {
+      throw new Error(body || "Rate limited. Add your own API key in Settings for higher limits.");
+    }
     throw new Error(body || `HTTP ${response.status}`);
   }
 

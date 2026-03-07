@@ -1,3 +1,4 @@
+import Image from "next/image";
 import NavBar from "@/components/nav-bar";
 
 const Section = ({ id, title, children }: { id: string; title: string; children: React.ReactNode }) => (
@@ -79,7 +80,7 @@ const Docs = () => (
         {/* 1 */}
         <Section id="embeddings" title="1. What are embeddings?">
           <P>
-            An embedding is a way of representing text as a list of numbers — a vector. The key
+            An embedding is a way of representing text as a list of numbers - a vector. The key
             property is that <em className="text-foreground">meaning is encoded geometrically</em>:
             text that means similar things produces vectors that are close together in space, while
             unrelated text produces vectors that are far apart.
@@ -110,7 +111,7 @@ const Docs = () => (
           </P>
           <P>
             To find the most relevant chunks for a query, we embed both the query and every chunk,
-            then rank by <em className="text-foreground">cosine similarity</em> — the angle between
+            then rank by <em className="text-foreground">cosine similarity</em> - the angle between
             two vectors. A similarity of 1.0 means identical direction (very similar), 0 means
             orthogonal (unrelated).
           </P>
@@ -120,7 +121,7 @@ top_k = sorted(chunks, by=similarity, descending=True)[:k]`}</Block>
           <P>
             In Revelio this happens entirely in the browser. When you select a query, the
             pre-computed embeddings are loaded from JSON and cosine similarity is computed
-            client-side in real time — no server round-trip needed for retrieval.
+            client-side in real time - no server round-trip needed for retrieval.
           </P>
         </Section>
 
@@ -132,15 +133,24 @@ top_k = sorted(chunks, by=similarity, descending=True)[:k]`}</Block>
             Once embeddings are computed, there are different strategies for picking which chunks to
             return. Revelio supports two, selectable from the settings menu.
           </P>
+          <div className="overflow-hidden rounded-lg border border-border">
+            <Image
+              src="/settings.png"
+              alt="Settings pane showing LLM provider options, BYOK note, corpus selector, retrieval mode, and accent colours"
+              width={716}
+              height={400}
+              className="w-full"
+            />
+          </div>
           <P className="font-medium text-foreground">Cosine similarity</P>
           <P>
             Ranks every chunk by its cosine similarity to the query and returns the top K. Fast and
-            predictable. Can return redundant chunks if the corpus has repeated content — you might
+            predictable. Can return redundant chunks if the corpus has repeated content - you might
             get five chunks all saying the same thing.
           </P>
           <Block>{`scores = [cosine(query, chunk) for chunk in corpus]
 top_k  = sorted(scores, descending=True)[:k]`}</Block>
-          <P className="font-medium text-foreground">MMR — Maximal Marginal Relevance</P>
+          <P className="font-medium text-foreground">MMR - Maximal Marginal Relevance</P>
           <P>
             MMR picks chunks that are both <em className="text-foreground">relevant to the query</em>{" "}
             and <em className="text-foreground">different from each other</em>. After selecting the
@@ -154,12 +164,12 @@ while len(selected) < k:
     selected.append(best)`}</Block>
           <P>
             Revelio uses λ=0.5, giving equal weight to relevance and diversity. Try MMR when your
-            cosine results all highlight the same passage — it tends to surface a broader range of
+            cosine results all highlight the same passage - it tends to surface a broader range of
             evidence for the LLM to work with.
           </P>
           <P>
             Both modes apply a similarity threshold of{" "}
-            <Code>0.3</Code> — chunks below this score are excluded regardless of K.
+            <Code>0.3</Code> - chunks below this score are excluded regardless of K.
           </P>
         </Section>
 
@@ -238,7 +248,7 @@ Question: Why was Alice bored?`}</Block>
         {/* 6 */}
         <Section id="umap" title="6. Dimensionality reduction & UMAP">
           <P>
-            Embedding vectors are 384 or 768 dimensions — impossible to visualise directly. To
+            Embedding vectors are 384 or 768 dimensions - impossible to visualise directly. To
             display them in 3D, we use{" "}
             <em className="text-foreground">
               Uniform Manifold Approximation and Projection (UMAP)
@@ -251,7 +261,7 @@ Question: Why was Alice bored?`}</Block>
             <em className="text-foreground">
               chunks that were close in 384D tend to stay close in 3D
             </em>
-            . You can see natural semantic clusters — passages about the same topic clump together.
+            . You can see natural semantic clusters - passages about the same topic clump together.
           </P>
           <Block>{`chunk embeddings: shape (N, 384)
          ↓  UMAP(n_components=3)
@@ -260,7 +270,7 @@ Question: Why was Alice bored?`}</Block>
 scatter plot points`}</Block>
           <P>
             The 3D coordinates are only used for visualisation. All retrieval still uses the
-            original high-dimensional embeddings — the projected positions are{" "}
+            original high-dimensional embeddings - the projected positions are{" "}
             <em className="text-foreground">not</em> used for cosine similarity.
           </P>
         </Section>
@@ -291,7 +301,7 @@ ui/public/data/alice.json`}</Block>
           <Block>{`load /data/alice.json          # fetch on corpus select
       ↓
 user selects a query
-      ↓  retrieve() — cosine similarity in the browser
+      ↓  retrieve() - cosine similarity in the browser
 top-K chunks highlighted in 3D viewer
       ↓
 POST /api/chat  { messages: [system, user+context] }
@@ -310,7 +320,7 @@ streamed answer → Answer Panel`}</Block>
         <Section id="models" title="8. Recommended models">
           <P>
             Revelio works with any OpenAI-compatible API. Smaller instruction-following models tend
-            to work better for RAG than large RLHF-trained ones — they follow the system prompt more
+            to work better for RAG than large RLHF-trained ones - they follow the system prompt more
             faithfully and avoid over-hedging when context is provided.
           </P>
           <div className="overflow-x-auto rounded-lg border border-border">
@@ -324,7 +334,7 @@ streamed answer → Answer Panel`}</Block>
               </thead>
               <tbody className="divide-y divide-border text-foreground/80">
                 {[
-                  ["qwen/qwen-2.5-7b-instruct", "OpenRouter (free)", "Best free option — concise, direct answers"],
+                  ["qwen/qwen-2.5-7b-instruct", "OpenRouter (free)", "Best free option - concise, direct answers"],
                   ["meta-llama/llama-3.1-8b-instruct", "OpenRouter", "Solid, widely supported"],
                   ["mistralai/mistral-7b-instruct:free", "OpenRouter (free)", "Good baseline, always available"],
                   ["qwen2.5:7b", "Ollama (local)", "Same model, runs fully offline"],
@@ -344,7 +354,6 @@ streamed answer → Answer Panel`}</Block>
             <Code>http://localhost:11434/v1</Code> with no key required. Both can be configured at
             runtime from the settings menu without restarting.
           </P>
-
           <P className="font-medium text-foreground">Getting an OpenRouter API key</P>
           <ol className="flex list-decimal flex-col gap-2 pl-5 text-sm text-foreground/80">
             <li>
@@ -360,7 +369,7 @@ streamed answer → Answer Panel`}</Block>
               in Revelio&apos;s settings menu.
             </li>
             <li>
-              Set the model ID — e.g.{" "}
+              Set the model ID - e.g.{" "}
               <Code>qwen/qwen-2.5-7b-instruct</Code>. You can browse all available models at{" "}
               <span className="font-mono text-foreground">openrouter.ai/models</span>.
             </li>
@@ -368,7 +377,7 @@ streamed answer → Answer Panel`}</Block>
 
           <P className="font-medium text-foreground">Using any other OpenAI-compatible provider</P>
           <P>
-            Any provider that implements the OpenAI chat completions API works — OpenAI itself,
+            Any provider that implements the OpenAI chat completions API works - OpenAI itself,
             Together AI, Groq, LM Studio, vLLM, etc. The settings menu has three fields:
           </P>
           <div className="overflow-x-auto rounded-lg border border-border">
@@ -394,7 +403,7 @@ streamed answer → Answer Panel`}</Block>
             </table>
           </div>
           <P>
-            The key is never sent to Revelio&apos;s server — it travels directly from your browser
+            The key is never sent to Revelio&apos;s server - it travels directly from your browser
             to the LLM provider in the <Code>Authorization</Code> header.
           </P>
         </Section>

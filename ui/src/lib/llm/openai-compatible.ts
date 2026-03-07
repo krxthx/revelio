@@ -34,6 +34,9 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
     });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error("rate_limit");
+      }
       const body = await response.text();
       throw new Error(`LLM request failed (${response.status}): ${body}`);
     }
@@ -81,7 +84,7 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
                   controller.enqueue(encoder.encode(content));
                 }
               } catch {
-                // Malformed JSON line — skip
+                // Malformed JSON line - skip
               }
             }
           }
