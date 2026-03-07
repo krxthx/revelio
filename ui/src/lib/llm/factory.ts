@@ -6,29 +6,32 @@
  *
  * Environment variables:
  *   LLM_BASE_URL  - Base URL of the LLM API endpoint
- *                   Default: https://openrouter.ai/api/v1  (OpenRouter)
- *                   Ollama:  http://localhost:11434/v1
+ *                   Default: https://openrouter.ai/api/v1
  *
  *   LLM_MODEL     - Model identifier string passed to the API
  *                   Default: mistralai/mistral-7b-instruct:free
- *                   Ollama example: mistral, llama3, phi3
  *
- *   LLM_API_KEY   - API key (for OpenRouter use your OR key; Ollama accepts any value)
+ *   LLM_API_KEY   - API key used for authenticated providers
  */
 
 import { OpenAICompatibleAdapter } from "./openai-compatible";
-import type { LLMAdapter } from "./types";
+import {
+  DEFAULT_LLM_API_KEY,
+  DEFAULT_LLM_BASE_URL,
+  DEFAULT_LLM_MODEL,
+} from "./constants";
+import type { LLMAdapter, LLMConfig } from "./types";
 
-const DEFAULTS = {
-  BASE_URL: "https://openrouter.ai/api/v1",
-  MODEL: "mistralai/mistral-7b-instruct:free",
-  API_KEY: "",
-} as const;
+export const getLLMConfig = (override: Partial<LLMConfig> = {}): LLMConfig => {
+  const baseUrl = override.baseUrl?.trim() || process.env.LLM_BASE_URL || DEFAULT_LLM_BASE_URL;
+  const model = override.model?.trim() || process.env.LLM_MODEL || DEFAULT_LLM_MODEL;
+  const apiKey = override.apiKey !== undefined
+    ? override.apiKey.trim()
+    : (process.env.LLM_API_KEY ?? DEFAULT_LLM_API_KEY);
 
-export const createLLMAdapter = (): LLMAdapter => {
-  const baseUrl = process.env.LLM_BASE_URL ?? DEFAULTS.BASE_URL;
-  const model = process.env.LLM_MODEL ?? DEFAULTS.MODEL;
-  const apiKey = process.env.LLM_API_KEY ?? DEFAULTS.API_KEY;
+  return { baseUrl, model, apiKey };
+};
 
-  return new OpenAICompatibleAdapter({ baseUrl, model, apiKey });
+export const createLLMAdapter = (override: Partial<LLMConfig> = {}): LLMAdapter => {
+  return new OpenAICompatibleAdapter(getLLMConfig(override));
 };

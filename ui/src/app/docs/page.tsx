@@ -254,7 +254,7 @@ user selects a query
 top-K chunks highlighted in 3D viewer
       ↓
 POST /api/chat  { messages: [system, user+context] }
-      ↓  LLM API (OpenRouter / Ollama / any OpenAI-compatible)
+      ↓  LLM API (OpenRouter / any OpenAI-compatible)
 streamed answer → Answer Panel`}</Block>
           <P>
             The LLM backend is configured via environment variables (<Code>LLM_BASE_URL</Code>,{" "}

@@ -1,6 +1,6 @@
 /**
  * OpenAI-compatible streaming adapter.
- * Works with OpenRouter, Ollama (/v1), LM Studio, vLLM, and any other
+ * Works with OpenRouter, LM Studio, vLLM, and any other
  * backend that implements the OpenAI chat completions API.
  */
 
@@ -15,13 +15,17 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
 
   async stream(messages: ChatMessage[]): Promise<ReadableStream<Uint8Array>> {
     const url = `${this.config.baseUrl.replace(/\/$/, "")}/chat/completions`;
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (this.config.apiKey) {
+      headers.Authorization = `Bearer ${this.config.apiKey}`;
+    }
 
     const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey}`,
-      },
+      headers,
       body: JSON.stringify({
         model: this.config.model,
         messages,

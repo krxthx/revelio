@@ -4,30 +4,69 @@ import { useEffect, useRef, useState } from "react";
 import { Settings2 } from "lucide-react";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
 import { CORPUS_IDS, CORPUS_LABELS, type CorpusId } from "@/lib/corpus";
+import {
+  LLM_BASE_URL_PLACEHOLDERS,
+  LLM_MODEL_PLACEHOLDERS,
+  LLM_PROVIDER_OPTIONS,
+  LLM_PROVIDER_PRESETS,
+} from "@/lib/llm/constants";
+import type { LLMProviderMode, LLMRuntimeConfig } from "@/lib/llm/types";
+import type { RetrievalMode } from "@/lib/retrieval";
 
 interface Props {
   topK: number;
   onTopKChange: (value: number) => void;
+  retrievalMode: RetrievalMode;
+  onRetrievalModeChange: (mode: RetrievalMode) => void;
   accentId: AccentId;
   onAccentChange: (id: AccentId) => void;
   corpusId: CorpusId;
   onCorpusChange: (id: CorpusId) => void;
   disabled?: boolean;
-  model?: string | null;
+  envModel?: string | null;
+  envBaseUrl?: string | null;
+  llmConfig: LLMRuntimeConfig;
+  onLlmConfigChange: (config: LLMRuntimeConfig) => void;
 }
+
+const RETRIEVAL_OPTIONS: Array<{ id: RetrievalMode; label: string }> = [
+  { id: "cosine", label: "Cosine" },
+  { id: "mmr", label: "MMR" },
+];
 
 const AppSettingsMenu = ({
   topK,
   onTopKChange,
+  retrievalMode,
+  onRetrievalModeChange,
   accentId,
   onAccentChange,
   corpusId,
   onCorpusChange,
   disabled,
-  model,
+  envModel,
+  envBaseUrl,
+  llmConfig,
+  onLlmConfigChange,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const updateLLMConfig = (patch: Partial<LLMRuntimeConfig>) => {
+    onLlmConfigChange({ ...llmConfig, ...patch });
+  };
+
+  const handleProviderChange = (provider: LLMProviderMode) => {
+    if (provider === "env") {
+      onLlmConfigChange({ ...llmConfig, provider });
+      return;
+    }
+
+    onLlmConfigChange({
+      provider,
+      ...LLM_PROVIDER_PRESETS[provider],
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -75,14 +114,95 @@ const AppSettingsMenu = ({
             Tune retrieval, corpus, and accent colors.
           </p>
 
-          {model && (
-            <div className="mb-4 rounded-md border border-border bg-muted/50 px-3 py-2">
-              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Model
-              </p>
-              <p className="truncate font-mono text-xs text-foreground">{model}</p>
+          <div className="mb-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              LLM
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {LLM_PROVIDER_OPTIONS.map((option) => {
+                const active = option.id === llmConfig.provider;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => handleProviderChange(option.id)}
+                    disabled={disabled}
+                    className={[
+                      "rounded-md border px-2 py-2 text-[11px] transition-colors",
+                      active
+                        ? "border-primary/50 bg-primary/10 text-foreground"
+                        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+                      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                    ].join(" ")}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
-          )}
+
+            {llmConfig.provider === "env" ? (
+              <div className="mt-3 rounded-md border border-border bg-muted/50 px-3 py-2">
+                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Server Defaults
+                </p>
+                <p className="truncate font-mono text-[11px] text-foreground">
+                  {envModel ?? "No env model configured"}
+                </p>
+                {envBaseUrl && (
+                  <p className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
+                    {envBaseUrl}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="mt-3 space-y-2">
+                <label className="block">
+                  <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Base URL
+                  </span>
+                  <input
+                    type="text"
+                    value={llmConfig.baseUrl}
+                    onChange={(event) => updateLLMConfig({ baseUrl: event.target.value })}
+                    disabled={disabled}
+                    placeholder={LLM_BASE_URL_PLACEHOLDERS[llmConfig.provider]}
+                    className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Model
+                  </span>
+                  <input
+                    type="text"
+                    value={llmConfig.model}
+                    onChange={(event) => updateLLMConfig({ model: event.target.value })}
+                    disabled={disabled}
+                    placeholder={LLM_MODEL_PLACEHOLDERS[llmConfig.provider]}
+                    className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                  />
+                </label>
+
+                {llmConfig.provider === "openai-compatible" && (
+                  <label className="block">
+                    <span className="mb-1 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      API Key
+                    </span>
+                    <input
+                      type="password"
+                      value={llmConfig.apiKey}
+                      onChange={(event) => updateLLMConfig({ apiKey: event.target.value })}
+                      disabled={disabled}
+                      placeholder="sk-..."
+                      className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                    />
+                  </label>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="mb-4">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
@@ -106,6 +226,34 @@ const AppSettingsMenu = ({
                     ].join(" ")}
                   >
                     {CORPUS_LABELS[id]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Retrieval
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {RETRIEVAL_OPTIONS.map((option) => {
+                const active = option.id === retrievalMode;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => onRetrievalModeChange(option.id)}
+                    disabled={disabled}
+                    className={[
+                      "rounded-md border px-2 py-2 text-[11px] transition-colors",
+                      active
+                        ? "border-primary/50 bg-primary/10 text-foreground"
+                        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+                      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                    ].join(" ")}
+                  >
+                    {option.label}
                   </button>
                 );
               })}

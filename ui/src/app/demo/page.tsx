@@ -13,55 +13,31 @@ import ChunkTooltip from "@/components/chunk-tooltip";
 import AppSettingsMenu from "@/components/app-settings-menu";
 import { useAccent } from "@/components/accent-provider";
 
-import { loadCorpus, isWordCorpus, type Chunk, type Corpus, type CorpusId, type Query } from "@/lib/corpus";
-import { retrieve } from "@/lib/retrieval";
+import {
+  loadCorpus,
+  isWordCorpus,
+  type Chunk,
+  type Corpus,
+  type CorpusId,
+  type Query,
+} from "@/lib/corpus";
+import {
+  EMPTY_LLM_CONFIG_SUMMARY,
+  DEFAULT_RUNTIME_LLM_CONFIG,
+} from "@/lib/llm/constants";
+import {
+  buildRagMessages,
+  fetchLLMConfigSummary,
+  streamChatResponse,
+} from "@/lib/llm/client";
+import { retrieve, retrieveMMR, type RetrievalMode } from "@/lib/retrieval";
 
 // R3F canvas must be client-only (no SSR)
-const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), { ssr: false });
+const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), {
+  ssr: false,
+});
 
 const DEFAULT_CORPUS: CorpusId = "alice";
-const SYSTEM_PROMPT =
-  "You are a helpful assistant. Answer the question using only the provided context. " +
-  "If the context does not contain enough information to answer, say so.";
-
-// ---------------------------------------------------------------------------
-// LLM streaming helper
-// ---------------------------------------------------------------------------
-
-const streamAnswer = async (
-  query: string,
-  chunks: Chunk[],
-  onChunk: (text: string) => void,
-  signal: AbortSignal,
-): Promise<void> => {
-  const context = chunks.map((c, i) => `[${i + 1}] ${c.text}`).join("\n\n");
-  const userMessage = `Context:\n${context}\n\nQuestion: ${query}`;
-
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    signal,
-    body: JSON.stringify({
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userMessage },
-      ],
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(body || `HTTP ${res.status}`);
-  }
-
-  const reader = res.body!.getReader();
-  const decoder = new TextDecoder();
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    onChunk(decoder.decode(value, { stream: true }));
-  }
-};
 
 // ---------------------------------------------------------------------------
 // Page
@@ -74,13 +50,14 @@ const Demo = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [topK, setTopK] = useState(5);
-  const [llmModel, setLlmModel] = useState<string | null>(null);
+  const [retrievalMode, setRetrievalMode] = useState<RetrievalMode>("cosine");
+  const [envLLMConfig, setEnvLLMConfig] = useState(EMPTY_LLM_CONFIG_SUMMARY);
+  const [llmConfig, setLlmConfig] = useState(DEFAULT_RUNTIME_LLM_CONFIG);
   const { accentId, accentColor, setAccentId } = useAccent();
 
   useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.json())
-      .then((data) => setLlmModel(data.model ?? null))
+    fetchLLMConfigSummary()
+      .then(setEnvLLMConfig)
       .catch(() => {});
   }, []);
 
@@ -111,18 +88,26 @@ const Demo = () => {
 
     loadCorpus(corpusId)
       .then(setCorpus)
-      .catch((err: unknown) => setLoadError(err instanceof Error ? err.message : String(err)))
+      .catch((err: unknown) =>
+        setLoadError(err instanceof Error ? err.message : String(err)),
+      )
       .finally(() => setLoading(false));
   }, [corpusId]);
 
-  // Re-retrieve when topK changes and a query is already selected
+  const doRetrieve = useCallback(
+    (embedding: number[], chunks: Chunk[], k: number) =>
+      retrievalMode === "mmr" ? retrieveMMR(embedding, chunks, k) : retrieve(embedding, chunks, k),
+    [retrievalMode],
+  );
+
+  // Re-retrieve when topK or retrievalMode changes and a query is already selected
   useEffect(() => {
     if (!corpus || !selectedQuery) return;
-    const top = retrieve(selectedQuery.embedding, corpus.chunks, topK);
+    const top = doRetrieve(selectedQuery.embedding, corpus.chunks, topK);
     setRetrievedChunks(top);
     setRetrievedIds(new Set(top.map((c) => c.id)));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topK]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topK, retrievalMode]);
 
   const handleReset = useCallback(() => {
     abortRef.current?.abort();
@@ -139,13 +124,13 @@ const Demo = () => {
       if (!corpus) return;
       setSelectedWord(word);
       // Retrieve nearest neighbors, excluding the word itself
-      const neighbors = retrieve(word.embedding, corpus.chunks, topK + 1).filter(
+      const neighbors = doRetrieve(word.embedding, corpus.chunks, topK + 1).filter(
         (c) => c.id !== word.id,
       );
       setRetrievedChunks(neighbors);
       setRetrievedIds(new Set([word.id, ...neighbors.map((c) => c.id)]));
     },
-    [corpus, topK],
+    [corpus, topK, doRetrieve],
   );
 
   const handleQuerySelect = useCallback(
@@ -160,18 +145,19 @@ const Demo = () => {
       setAnswer("");
       setAnswerError(null);
 
-      const top = retrieve(query.embedding, corpus.chunks, topK);
+      const top = doRetrieve(query.embedding, corpus.chunks, topK);
       setRetrievedChunks(top);
       setRetrievedIds(new Set(top.map((c) => c.id)));
+      const messages = buildRagMessages(query.text, top);
 
       setStreaming(true);
       try {
-        await streamAnswer(
-          query.text,
-          top,
-          (chunk) => setAnswer((prev) => prev + chunk),
-          controller.signal,
-        );
+        await streamChatResponse({
+          messages,
+          llmConfig,
+          onChunk: (chunk) => setAnswer((prev) => prev + chunk),
+          signal: controller.signal,
+        });
       } catch (err: unknown) {
         if ((err as { name?: string }).name === "AbortError") return;
         setAnswerError(err instanceof Error ? err.message : "Unknown error");
@@ -179,7 +165,7 @@ const Demo = () => {
         setStreaming(false);
       }
     },
-    [corpus, topK],
+    [corpus, llmConfig, topK, doRetrieve],
   );
 
   const handleCorpusChange = (id: CorpusId) => {
@@ -194,12 +180,17 @@ const Demo = () => {
           <AppSettingsMenu
             topK={topK}
             onTopKChange={setTopK}
+            retrievalMode={retrievalMode}
+            onRetrievalModeChange={setRetrievalMode}
             accentId={accentId}
             onAccentChange={setAccentId}
             corpusId={corpusId}
             onCorpusChange={handleCorpusChange}
             disabled={loading || streaming}
-            model={llmModel}
+            envModel={envLLMConfig.model}
+            envBaseUrl={envLLMConfig.baseUrl}
+            llmConfig={llmConfig}
+            onLlmConfigChange={setLlmConfig}
           />
         }
       />
@@ -211,7 +202,10 @@ const Demo = () => {
           {loading ? (
             <div className="flex flex-col gap-1.5">
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="h-9 rounded-md bg-muted animate-pulse" />
+                <div
+                  key={i}
+                  className="h-9 rounded-md bg-muted animate-pulse"
+                />
               ))}
             </div>
           ) : loadError ? (
@@ -243,9 +237,15 @@ const Demo = () => {
               streaming={streaming}
               retrievedColor={accentColor}
               onHoverChunk={setHoveredChunk}
-              onClickChunk={isWordCorpus(corpusId) ? handleWordSelect : undefined}
-              graphCenter={isWordCorpus(corpusId) ? selectedWord ?? undefined : undefined}
-              graphNeighbors={isWordCorpus(corpusId) ? retrievedChunks : undefined}
+              onClickChunk={
+                isWordCorpus(corpusId) ? handleWordSelect : undefined
+              }
+              graphCenter={
+                isWordCorpus(corpusId) ? (selectedWord ?? undefined) : undefined
+              }
+              graphNeighbors={
+                isWordCorpus(corpusId) ? retrievedChunks : undefined
+              }
               autoRotate={!selectedQuery && !selectedWord}
             />
           )}

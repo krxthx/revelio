@@ -1,3 +1,6 @@
+import { getLLMConfig } from "@/lib/llm/factory";
+
 export const GET = () => {
-  return Response.json({ model: process.env.LLM_MODEL ?? null });
+  const { baseUrl, model } = getLLMConfig();
+  return Response.json({ baseUrl, model });
 };
