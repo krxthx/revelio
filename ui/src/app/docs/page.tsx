@@ -19,7 +19,7 @@ const Code = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Block = ({ children }: { children: React.ReactNode }) => (
-  <pre className="overflow-x-auto rounded-lg border border-border bg-muted p-4 font-mono text-xs leading-relaxed text-foreground">
+  <pre className="overflow-x-auto rounded-2xl border border-white/12 bg-white/[0.07] p-4 font-mono text-xs leading-relaxed text-foreground shadow-[0_20px_60px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md">
     {children}
   </pre>
 );
@@ -27,33 +27,34 @@ const Block = ({ children }: { children: React.ReactNode }) => (
 const Divider = () => <hr className="border-border" />;
 
 const Docs = () => (
-  <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+  <div className="relative isolate flex min-h-screen flex-col bg-background text-foreground">
     <div
-      className="fixed inset-0 pointer-events-none"
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 -z-10"
       style={{
         backgroundImage: `
-          radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 36%),
-          radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 44%),
-          radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--primary) 5%, transparent), transparent 48%),
-          linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(10, 10, 10, 0.58))
+          radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--primary) 11%, transparent), transparent 36%),
+          radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--primary) 7%, transparent), transparent 44%),
+          radial-gradient(circle at 50% 78%, color-mix(in srgb, var(--primary) 4%, transparent), transparent 48%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(10, 10, 10, 0.42))
         `,
       }}
     />
     <NavBar />
 
-    <div className="mx-auto w-full max-w-2xl px-6 py-12">
+    <div className="relative z-10 mx-auto w-full max-w-2xl px-6 py-12">
       {/* Page header */}
       <div className="mb-10 flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">How Revelio Works</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-foreground/72">
           A guide to the concepts behind Retrieval-Augmented Generation, embeddings, and what
           Revelio is actually showing you.
         </p>
       </div>
 
       {/* TOC */}
-      <nav className="mb-10 rounded-lg border border-border bg-card p-4">
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+      <nav className="mb-10 rounded-2xl border border-white/12 bg-white/6 p-4 shadow-[0_18px_48px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-foreground/45">
           Contents
         </p>
         <ol className="flex flex-col gap-1.5 text-sm">
@@ -68,7 +69,7 @@ const Docs = () => (
             ["#models", "8. Recommended models"],
           ].map(([href, label]) => (
             <li key={href}>
-              <a href={href} className="text-foreground/70 hover:text-foreground transition-colors">
+              <a href={href} className="text-foreground/78 transition-colors hover:text-foreground">
                 {label}
               </a>
             </li>
