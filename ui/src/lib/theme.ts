@@ -28,12 +28,12 @@ export type AccentId = (typeof ACCENT_OPTIONS)[number]["id"];
 export const POINT_COLORS = {
   default:   "#a1a1aa",              /* zinc-400 - clearly visible on dark bg */
   hovered:   COLORS.foreground,
-  dimmed:    "#71717a",              /* zinc-500 - de-emphasised but still legible */
+  dimmed:    "#a1a1aa",              /* same as default — non-retrieved stay fully visible */
 } as const;
 
 export const POINT_OPACITY = {
   default:   0.9,
-  dimmed:    0.45,
+  dimmed:    0.9,
   retrieved: 1.0,
 } as const;
 

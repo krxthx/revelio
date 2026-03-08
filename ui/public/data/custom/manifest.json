@@ -1,0 +1,14 @@
+{
+  "projects": [
+    {
+      "id": "prompt-engineering",
+      "label": "Prompt Engineering",
+      "file": "prompt-engineering.json"
+    },
+    {
+      "id": "dnn-midsem",
+      "label": "DNN MidSem",
+      "file": "dnn-midsem.json"
+    }
+  ]
+}

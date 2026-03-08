@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Settings2, X } from "lucide-react";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
-import { CORPUS_IDS, CORPUS_LABELS, type CorpusId } from "@/lib/corpus";
+import {
+  CORPUS_IDS,
+  CORPUS_LABELS,
+  loadManifest,
+  type CorpusId,
+  type ManifestEntry,
+} from "@/lib/corpus";
 import {
   LLM_BASE_URL_PLACEHOLDERS,
   LLM_MODEL_PLACEHOLDERS,
@@ -34,6 +40,36 @@ const RETRIEVAL_OPTIONS: Array<{ id: RetrievalMode; label: string }> = [
   { id: "mmr", label: "MMR" },
 ];
 
+const CorpusButton = ({
+  id,
+  label,
+  active,
+  disabled,
+  onClick,
+}: {
+  id: string;
+  label: string;
+  active: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) => (
+  <button
+    key={id}
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className={[
+      "rounded-md border px-2.5 py-2 text-left text-xs transition-colors",
+      active
+        ? "border-primary/50 bg-primary/10 text-foreground"
+        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
+      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+    ].join(" ")}
+  >
+    {label}
+  </button>
+);
+
 const AppSettingsMenu = ({
   topK,
   onTopKChange,
@@ -50,7 +86,13 @@ const AppSettingsMenu = ({
   onLlmConfigChange,
 }: Props) => {
   const [open, setOpen] = useState(false);
+  const [customEntries, setCustomEntries] = useState<ManifestEntry[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Load custom corpus manifest once on mount
+  useEffect(() => {
+    loadManifest().then(setCustomEntries).catch(() => {});
+  }, []);
 
   const updateLLMConfig = (patch: Partial<LLMRuntimeConfig>) => {
     onLlmConfigChange({ ...llmConfig, ...patch });
@@ -225,27 +267,36 @@ const AppSettingsMenu = ({
               Corpus
             </p>
             <div className="grid grid-cols-2 gap-2">
-              {CORPUS_IDS.map((id) => {
-                const active = id === corpusId;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => onCorpusChange(id)}
-                    disabled={disabled}
-                    className={[
-                      "rounded-md border px-2.5 py-2 text-left text-xs transition-colors",
-                      active
-                        ? "border-primary/50 bg-primary/10 text-foreground"
-                        : "border-border text-muted-foreground hover:bg-muted hover:text-foreground",
-                      disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
-                    ].join(" ")}
-                  >
-                    {CORPUS_LABELS[id]}
-                  </button>
-                );
-              })}
+              {CORPUS_IDS.map((id) => (
+                <CorpusButton
+                  key={id}
+                  id={id}
+                  label={CORPUS_LABELS[id]}
+                  active={id === corpusId}
+                  disabled={disabled}
+                  onClick={() => onCorpusChange(id)}
+                />
+              ))}
             </div>
+
+            {customEntries.length > 0 && (
+              <div className="mt-3">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Your Projects
+                </p>
+                <select
+                  value={customEntries.some((e) => e.id === corpusId) ? corpusId : ""}
+                  onChange={(e) => e.target.value && onCorpusChange(e.target.value)}
+                  disabled={disabled}
+                  className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="" disabled>Select a project…</option>
+                  {customEntries.map((entry) => (
+                    <option key={entry.id} value={entry.id}>{entry.label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="mb-4">

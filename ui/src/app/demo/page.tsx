@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 
 import NavBar from "@/components/nav-bar";
 import QuerySelector from "@/components/query-selector";
+import FreeTextQuery from "@/components/free-text-query";
 import WordBrowser from "@/components/word-browser";
 import PromptBuilder from "@/components/prompt-builder";
 import AnswerPanel from "@/components/answer-panel";
@@ -16,6 +17,7 @@ import { useAccent } from "@/components/accent-provider";
 import {
   loadCorpus,
   isWordCorpus,
+  isCustomCorpus,
   type Chunk,
   type Corpus,
   type CorpusId,
@@ -245,6 +247,11 @@ const Demo = () => {
                 words={corpus.chunks}
                 selectedId={selectedWord?.id ?? null}
                 onSelect={handleWordSelect}
+              />
+            ) : isCustomCorpus(corpusId) ? (
+              <FreeTextQuery
+                onSubmit={handleQuerySelect}
+                disabled={streaming}
               />
             ) : (
               <QuerySelector

@@ -36,6 +36,9 @@ const ChunkTooltip = ({ chunk }: Props) => {
       style={{ left: pos.x, top: pos.y }}
     >
       <p className="mb-1 font-mono text-[10px] text-muted-foreground">{chunk.id}</p>
+      {chunk.source && (
+        <p className="mb-1 text-[10px] text-muted-foreground/70">{chunk.source}</p>
+      )}
       <p className="leading-relaxed">{preview}</p>
     </div>
   );

@@ -10,6 +10,8 @@ interface Props {
 }
 
 const QuerySelector = ({ queries, selectedId, onSelect, disabled }: Props) => {
+  if (queries.length === 0) return null;
+
   return (
     <div className="flex flex-col gap-1.5">
       <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
