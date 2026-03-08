@@ -1,6 +1,10 @@
-# Revelio
+<p align="center">
+  <img src="ui/public/logo.png" alt="Revelio logo" width="96" />
+</p>
 
-An interactive RAG (Retrieval-Augmented Generation) explorer that visualizes text embeddings in 3D space and lets you see how semantic search works under the hood.
+# Revelio 🔎✨🚀
+
+An interactive RAG (Retrieval-Augmented Generation) explorer that visualizes text embeddings in 3D space and lets you see how semantic search works under the hood. 🧠📚🌌
 
 ## What it shows
 

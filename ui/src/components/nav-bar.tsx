@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Github } from "lucide-react";
@@ -31,8 +32,12 @@ const NavBar = ({ rightSlot }: Props) => {
       ].join(" ")}
     >
       <div className="flex items-center gap-4">
-        <Link href="/" className="text-sm font-semibold tracking-tight text-foreground">
-          Revelio
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground"
+        >
+          <Image src="/logo.png" alt="Revelio logo" width={32} height={32} className="h-8 w-8" />
+          <span>Revelio</span>
         </Link>
         <nav className="flex items-center gap-0.5">
           <Link href="/demo" className={linkClass("/demo")}>
