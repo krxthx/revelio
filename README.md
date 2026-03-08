@@ -10,12 +10,15 @@ An interactive RAG (Retrieval-Augmented Generation) explorer that visualizes tex
 - **Prompt assembly** - see exactly how retrieved chunks get assembled into the LLM prompt.
 - **Streamed answer** - the LLM generates a response grounded in the retrieved context.
 - **Word embeddings** - switch to the "Word Embeddings" corpus to explore how ~2000 common English words cluster by meaning.
+- **Custom documents** - index your own files and explore them with the same pipeline.
 
 ## Architecture
 
 ```
 revelio/
-├── cli/            # Python pipeline: chunk → embed → UMAP → JSON
+├── cli/
+│   ├── revelio.py         # Custom corpus indexing CLI
+│   ├── extract.py         # Multi-format text extraction (TXT, MD, PDF, images)
 │   └── demo/
 │       ├── chunking.py        # Text splitting
 │       ├── embedding.py       # sentence-transformers inference
@@ -26,16 +29,20 @@ revelio/
     └── src/
         ├── app/
         │   ├── page.tsx           # Main app
+        │   ├── demo/page.tsx      # Demo page (free model preset)
+        │   ├── docs/page.tsx      # Explainer: embeddings, RAG, UMAP, chunking
         │   └── api/chat/route.ts  # Streaming LLM endpoint
         ├── components/
-        │   ├── embedding-space.tsx  # 3D canvas (React Three Fiber)
-        │   ├── query-selector.tsx   # Pre-built query list
-        │   ├── word-browser.tsx     # Word search/browse panel
-        │   ├── similar-words.tsx    # Nearest neighbor display
-        │   ├── prompt-builder.tsx   # Shows constructed RAG prompt
-        │   └── answer-panel.tsx     # Streams LLM answer
+        │   ├── embedding-space.tsx    # 3D canvas (React Three Fiber)
+        │   ├── app-settings-menu.tsx  # LLM, corpus, retrieval, accent settings
+        │   ├── query-selector.tsx     # Pre-built query list
+        │   ├── word-browser.tsx       # Word search/browse panel
+        │   ├── similar-words.tsx      # Nearest neighbor display
+        │   ├── prompt-builder.tsx     # Shows constructed RAG prompt
+        │   └── answer-panel.tsx       # Streams LLM answer
         └── lib/
-            ├── corpus.ts      # Corpus loading + types
+            ├── corpus.ts      # Corpus loading + custom manifest support
+            ├── embedder.ts    # Client-side embedding inference
             ├── retrieval.ts   # Cosine similarity + MMR (client-side)
             └── llm/           # OpenAI-compatible LLM adapter
 ```
@@ -49,7 +56,7 @@ cd cli
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Generate all corpora
+# Generate all built-in corpora
 python -m demo --all
 
 # Or a single corpus
@@ -81,6 +88,29 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## Custom documents
+
+Index your own folder of documents and explore them with the same RAG pipeline.
+
+```bash
+cd cli
+source .venv/bin/activate
+
+python revelio.py index ./path/to/your/docs --name "My Project"
+```
+
+Supported file types: `.txt`, `.md`, `.pdf`, `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`
+
+PDF support requires `pypdf`. Image OCR requires `pytesseract` and `Pillow` (plus the `tesseract` system binary: `brew install tesseract`).
+
+The command:
+1. Extracts text from all supported files in the folder (recursively)
+2. Chunks, embeds, and projects the text to 3D with UMAP
+3. Writes `ui/public/data/custom/{slug}.json`
+4. Updates `ui/public/data/custom/manifest.json`
+
+Restart the dev server (`npm run dev`) and your corpus appears under **"Your Projects"** in the settings menu.
 
 ## Recommended models
 
@@ -115,19 +145,19 @@ The embedding space uses UMAP to project 384-dimensional vectors down to 3D for 
 | `fastapi` | FastAPI Docs | Framework documentation - tight clusters by feature area |
 | `space` | Space Exploration | Factual text - broad topic spread, mixed density |
 | `words` | Word Embeddings | ~2000 common English words |
+| custom | Your Projects | Any folder indexed with `revelio.py index` |
 
 ## Tech stack
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **3D visualization**: Three.js, React Three Fiber, Drei
-- **Embeddings**: sentence-transformers (Python)
+- **Embeddings**: sentence-transformers (Python), client-side inference (browser)
 - **Dimensionality reduction**: UMAP (3D projection)
 - **LLM backend**: Any OpenAI-compatible API (OpenRouter, Ollama, LM Studio, vLLM)
 - **Retrieval**: Client-side cosine similarity and MMR
 
 ## Future ideas
 
-- **Phase 2 CLI** - ingest your own documents and run RAG on them locally
 - **Chunking visualizer** - compare fixed-size vs sentence vs semantic chunking side by side
 - **BM25 vs semantic** - keyword vs embedding retrieval comparison
 - **Token visualizer** - see how text and images get tokenized across different models

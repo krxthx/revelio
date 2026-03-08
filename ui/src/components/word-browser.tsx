@@ -33,7 +33,7 @@ const WordBrowser = ({ words, selectedId, onSelect }: Props) => {
       <p className="text-[10px] text-muted-foreground">
         {filtered.length.toLocaleString()} word{filtered.length !== 1 ? "s" : ""}
       </p>
-      <div className="flex flex-col gap-0.5 overflow-y-auto flex-1">
+      <div className="flex flex-col gap-0.5 overflow-y-auto flex-1 px-px">
         {filtered.slice(0, 200).map((w) => {
           const active = w.id === selectedId;
           return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Settings2, X } from "lucide-react";
+import { ChevronDown, Settings2, X } from "lucide-react";
 import { ACCENT_OPTIONS, type AccentId } from "@/lib/theme";
 import {
   CORPUS_IDS,
@@ -39,6 +39,9 @@ const RETRIEVAL_OPTIONS: Array<{ id: RetrievalMode; label: string }> = [
   { id: "cosine", label: "Cosine" },
   { id: "mmr", label: "MMR" },
 ];
+
+const FIELD_CLASS_NAME =
+  "w-full rounded-md border border-border bg-muted/70 px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50";
 
 const CorpusButton = ({
   id,
@@ -225,7 +228,7 @@ const AppSettingsMenu = ({
                     onChange={(event) => updateLLMConfig({ baseUrl: event.target.value })}
                     disabled={disabled}
                     placeholder={LLM_BASE_URL_PLACEHOLDERS[llmConfig.provider]}
-                    className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                    className={FIELD_CLASS_NAME}
                   />
                 </label>
 
@@ -239,7 +242,7 @@ const AppSettingsMenu = ({
                     onChange={(event) => updateLLMConfig({ model: event.target.value })}
                     disabled={disabled}
                     placeholder={LLM_MODEL_PLACEHOLDERS[llmConfig.provider]}
-                    className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                    className={FIELD_CLASS_NAME}
                   />
                 </label>
 
@@ -254,7 +257,7 @@ const AppSettingsMenu = ({
                       onChange={(event) => updateLLMConfig({ apiKey: event.target.value })}
                       disabled={disabled}
                       placeholder="sk-..."
-                      className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                      className={FIELD_CLASS_NAME}
                     />
                   </label>
                 )}
@@ -284,17 +287,23 @@ const AppSettingsMenu = ({
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   Your Projects
                 </p>
-                <select
-                  value={customEntries.some((e) => e.id === corpusId) ? corpusId : ""}
-                  onChange={(e) => e.target.value && onCorpusChange(e.target.value)}
-                  disabled={disabled}
-                  className="w-full rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="" disabled>Select a project…</option>
-                  {customEntries.map((entry) => (
-                    <option key={entry.id} value={entry.id}>{entry.label}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <select
+                    value={customEntries.some((e) => e.id === corpusId) ? corpusId : ""}
+                    onChange={(e) => e.target.value && onCorpusChange(e.target.value)}
+                    disabled={disabled}
+                    className={`${FIELD_CLASS_NAME} appearance-none pr-9`}
+                  >
+                    <option value="" disabled>Select a project…</option>
+                    {customEntries.map((entry) => (
+                      <option key={entry.id} value={entry.id}>{entry.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                </div>
               </div>
             )}
           </div>
