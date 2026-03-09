@@ -79,7 +79,7 @@ const AnswerPanel = ({ query, answer, streaming, retrievedChunks, error, onClear
 
             {/* Main response */}
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-              {response || (streaming && !isThinking ? "" : (!response && !isThinking ? "…" : ""))}
+              {response || (!streaming && !isThinking ? "…" : "")}
               {streaming && !isThinking && (
                 <span className="ml-0.5 inline-block h-3.5 w-0.5 animate-pulse bg-primary align-middle" />
               )}

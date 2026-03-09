@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import NavBar from "@/components/nav-bar";
@@ -14,25 +14,17 @@ import ChunkTooltip from "@/components/chunk-tooltip";
 import AppSettingsMenu from "@/components/app-settings-menu";
 import { useAccent } from "@/components/accent-provider";
 
-import {
-  loadCorpus,
-  isWordCorpus,
-  isCustomCorpus,
-  type Chunk,
-  type Corpus,
-  type CorpusId,
-  type Query,
-} from "@/lib/corpus";
+import { isWordCorpus, isCustomCorpus, type CorpusId, type Query } from "@/lib/corpus";
 import {
   EMPTY_LLM_CONFIG_SUMMARY,
   DEFAULT_RUNTIME_LLM_CONFIG,
 } from "@/lib/llm/constants";
-import {
-  buildRagMessages,
-  fetchLLMConfigSummary,
-  streamChatResponse,
-} from "@/lib/llm/client";
-import { retrieve, retrieveMMR, type RetrievalMode, type ScoredChunk } from "@/lib/retrieval";
+import { buildRagMessages, fetchLLMConfigSummary } from "@/lib/llm/client";
+import type { RetrievalMode } from "@/lib/retrieval";
+
+import { useCorpus } from "@/hooks/use-corpus";
+import { useRetrieval } from "@/hooks/use-retrieval";
+import { useStreamingAnswer } from "@/hooks/use-streaming-answer";
 
 // R3F canvas must be client-only (no SSR)
 const EmbeddingSpace = dynamic(() => import("@/components/embedding-space"), {
@@ -47,108 +39,52 @@ const DEFAULT_CORPUS: CorpusId = "words";
 
 const Demo = () => {
   const [corpusId, setCorpusId] = useState<CorpusId>(DEFAULT_CORPUS);
-  const [corpus, setCorpus] = useState<Corpus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { corpus, loading, loadError } = useCorpus(corpusId);
 
   const [topK, setTopK] = useState(5);
   const [retrievalMode, setRetrievalMode] = useState<RetrievalMode>("cosine");
-  const [envLLMConfig, setEnvLLMConfig] = useState(EMPTY_LLM_CONFIG_SUMMARY);
-  const [llmConfig, setLlmConfig] = useState(DEFAULT_RUNTIME_LLM_CONFIG);
   const { accentId, accentColor, setAccentId } = useAccent();
 
-  useEffect(() => {
-    fetchLLMConfigSummary()
-      .then(setEnvLLMConfig)
-      .catch(() => {});
-  }, []);
+  const [envLLMConfig, setEnvLLMConfig] = useState(EMPTY_LLM_CONFIG_SUMMARY);
+  const [llmConfig, setLlmConfig] = useState(DEFAULT_RUNTIME_LLM_CONFIG);
 
-  const [selectedQuery, setSelectedQuery] = useState<Query | null>(null);
-  const [selectedWord, setSelectedWord] = useState<Chunk | null>(null);
-  const [retrievedChunks, setRetrievedChunks] = useState<ScoredChunk[]>([]);
-  const [retrievedIds, setRetrievedIds] = useState<Set<string>>(new Set());
+  const {
+    selectedQuery,
+    selectedWord,
+    retrievedChunks,
+    retrievedIds,
+    retrievedScores,
+    hoveredChunk,
+    setHoveredChunk,
+    doRetrieve,
+    applyQuery,
+    handleWordSelect,
+    reset: resetRetrieval,
+  } = useRetrieval(corpus, topK, retrievalMode);
 
-  // Min-max normalized scores [0, 1] per chunk id — so 3D color matches ranking
-  const retrievedScores = useMemo(() => {
-    const map = new Map<string, number>();
-    if (retrievedChunks.length === 0) return map;
-    const scores = retrievedChunks.map((s) => s.score);
-    const minScore = Math.min(...scores);
-    const maxScore = Math.max(...scores);
-    const range = maxScore - minScore;
-    for (const { chunk, score } of retrievedChunks) {
-      // Normalize to [0.25, 1] so even the lowest scorer is clearly visible
-      const t = range > 0.005 ? (score - minScore) / range : 1;
-      map.set(chunk.id, 0.25 + t * 0.75);
-    }
-    return map;
-  }, [retrievedChunks]);
-
-  const [hoveredChunk, setHoveredChunk] = useState<Chunk | null>(null);
-
-  const [answer, setAnswer] = useState("");
-  const [streaming, setStreaming] = useState(false);
-  const [answerError, setAnswerError] = useState<string | null>(null);
+  const { answer, streaming, answerError, stream, reset: resetStream } = useStreamingAnswer(llmConfig);
 
   const abortRef = useRef<AbortController | null>(null);
 
-  // Load corpus whenever corpusId changes
   useEffect(() => {
-    setLoading(true);
-    setLoadError(null);
-    setSelectedQuery(null);
-    setSelectedWord(null);
-    setRetrievedChunks([]);
-    setRetrievedIds(new Set());
-    setAnswer("");
-    setAnswerError(null);
-    abortRef.current?.abort();
-
-    loadCorpus(corpusId)
-      .then(setCorpus)
-      .catch((err: unknown) =>
-        setLoadError(err instanceof Error ? err.message : String(err)),
-      )
-      .finally(() => setLoading(false));
-  }, [corpusId]);
-
-  const doRetrieve = useCallback(
-    (embedding: number[], chunks: Chunk[], k: number) =>
-      retrievalMode === "mmr" ? retrieveMMR(embedding, chunks, k) : retrieve(embedding, chunks, k),
-    [retrievalMode],
-  );
-
-  // Re-retrieve when topK or retrievalMode changes and a query is already selected
-  useEffect(() => {
-    if (!corpus || !selectedQuery) return;
-    const top = doRetrieve(selectedQuery.embedding, corpus.chunks, topK);
-    setRetrievedChunks(top);
-    setRetrievedIds(new Set(top.map((s) => s.chunk.id)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topK, retrievalMode]);
+    // Env LLM config is optional — a missing /api/config endpoint is expected in local dev
+    fetchLLMConfigSummary().then(setEnvLLMConfig).catch(() => {});
+  }, []);
 
   const handleReset = useCallback(() => {
     abortRef.current?.abort();
-    setSelectedQuery(null);
-    setSelectedWord(null);
-    setRetrievedChunks([]);
-    setRetrievedIds(new Set());
-    setAnswer("");
-    setAnswerError(null);
-  }, []);
+    resetRetrieval();
+    resetStream();
+  }, [resetRetrieval, resetStream]);
 
-  const handleWordSelect = useCallback(
-    (word: Chunk) => {
-      if (!corpus) return;
-      setSelectedWord(word);
-      // Retrieve nearest neighbors, excluding the word itself
-      const neighbors = doRetrieve(word.embedding, corpus.chunks, topK + 1).filter(
-        (s) => s.chunk.id !== word.id,
-      );
-      setRetrievedChunks(neighbors);
-      setRetrievedIds(new Set([word.id, ...neighbors.map((s) => s.chunk.id)]));
+  const handleCorpusChange = useCallback(
+    (id: CorpusId) => {
+      abortRef.current?.abort();
+      resetRetrieval();
+      resetStream();
+      setCorpusId(id);
     },
-    [corpus, topK, doRetrieve],
+    [resetRetrieval, resetStream],
   );
 
   const handleQuerySelect = useCallback(
@@ -159,37 +95,14 @@ const Demo = () => {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      setSelectedQuery(query);
-      setAnswer("");
-      setAnswerError(null);
-
       const top = doRetrieve(query.embedding, corpus.chunks, topK);
-      setRetrievedChunks(top);
-      setRetrievedIds(new Set(top.map((s) => s.chunk.id)));
+      applyQuery(query, top);
+
       const messages = buildRagMessages(query.text, top.map((s) => s.chunk));
-
-      setStreaming(true);
-      try {
-        await streamChatResponse({
-          messages,
-          llmConfig,
-          onChunk: (chunk) => setAnswer((prev) => prev + chunk),
-          signal: controller.signal,
-        });
-      } catch (err: unknown) {
-        if ((err as { name?: string }).name === "AbortError") return;
-        setAnswerError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setStreaming(false);
-      }
+      await stream(messages, controller.signal);
     },
-    [corpus, llmConfig, topK, doRetrieve],
+    [corpus, doRetrieve, topK, applyQuery, stream],
   );
-
-  const handleCorpusChange = (id: CorpusId) => {
-    abortRef.current?.abort();
-    setCorpusId(id);
-  };
 
   return (
     <div className="relative flex h-screen flex-col bg-background text-foreground overflow-hidden">

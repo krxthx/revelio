@@ -84,7 +84,11 @@ export class OpenAICompatibleAdapter implements LLMAdapter {
                   controller.enqueue(encoder.encode(content));
                 }
               } catch {
-                // Malformed JSON line - skip
+                // Malformed JSON line from the SSE stream — skip silently in production.
+                // In development, log so unexpected format issues are visible.
+                if (process.env.NODE_ENV === "development") {
+                  console.warn("[SSE] Malformed JSON chunk:", data); // eslint-disable-line no-console
+                }
               }
             }
           }
