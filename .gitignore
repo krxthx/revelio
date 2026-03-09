@@ -44,6 +44,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# custom corpora (user-generated, not tracked)
+ui/public/data/custom/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
