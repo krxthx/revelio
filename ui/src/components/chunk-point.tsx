@@ -14,7 +14,6 @@ const SCALE_LERP_SPEED = 8;
 const PULSE_SPEED = 0.004;
 const PULSE_AMPLITUDE = 0.05;
 
-/** Lerp between dim base and full accent based on normalized score [0, 1]. */
 const scoreToColor = (accentHex: string, t: number): string => {
   const accent = new Color(accentHex);
   const dim = new Color(COLORS.mutedForeground);
@@ -28,7 +27,6 @@ interface Props {
   isDimmed: boolean;
   streaming: boolean;
   retrievedColor: string;
-  /** Normalized similarity score in [0, 1] — 1 = highest in the retrieved set. */
   retrievalScore?: number;
   onHover: (chunk: Chunk | null) => void;
   onClick?: (chunk: Chunk) => void;
@@ -65,7 +63,6 @@ const ChunkPoint = ({
     meshRef.current.scale.setScalar(next * pulse);
   });
 
-  // Score-graded color: lerp dim → accent based on normalized score
   const scoredColor = useMemo(() => {
     if (!isRetrieved || retrievalScore === undefined) return retrievedColor;
     return scoreToColor(retrievedColor, retrievalScore);

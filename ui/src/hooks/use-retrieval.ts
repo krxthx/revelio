@@ -27,7 +27,6 @@ export const useRetrieval = (
   const [retrievedIds, setRetrievedIds] = useState<Set<string>>(new Set());
   const [hoveredChunk, setHoveredChunk] = useState<Chunk | null>(null);
 
-  // Min-max normalized scores [0.25, 1] so even lowest scorer is clearly visible
   const retrievedScores = useMemo(() => {
     const map = new Map<string, number>();
     if (retrievedChunks.length === 0) return map;
@@ -48,8 +47,6 @@ export const useRetrieval = (
     [retrievalMode],
   );
 
-  // Re-retrieve when topK or retrievalMode changes while a query is active.
-  // Intentionally omits corpus/selectedQuery/doRetrieve to only react to setting changes.
   useEffect(() => {
     if (!corpus || !selectedQuery) return;
     const top = doRetrieve(selectedQuery.embedding, corpus.chunks, topK);

@@ -54,9 +54,8 @@ const Docs = () => (
     />
     <NavBar />
 
-    {/* Fixed right sidebar — right-5 matches the nav's px-5, top-[60px] clears the sticky nav */}
     <aside
-      className="fixed right-5 top-[60px] z-30 hidden w-44 overflow-y-auto lg:block"
+      className="fixed right-5 top-15 z-30 hidden w-44 overflow-y-auto lg:block"
       style={{ maxHeight: "calc(100vh - 60px)" }}
     >
       <nav className="py-10">
@@ -82,7 +81,6 @@ const Docs = () => (
     </aside>
 
     <div className="relative z-10 mx-auto w-full max-w-2xl px-6 py-12">
-      {/* Page header */}
       <div className="mb-10 flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">How Revelio Works</h1>
         <p className="text-sm text-foreground/72">
@@ -91,9 +89,7 @@ const Docs = () => (
         </p>
       </div>
 
-        {/* Main content */}
         <div>
-          {/* Mobile TOC */}
           <nav className="mb-10 rounded-2xl border border-white/12 bg-white/6 p-4 shadow-[0_18px_48px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md lg:hidden">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-foreground/45">
               Contents
@@ -110,7 +106,6 @@ const Docs = () => (
           </nav>
 
           <div className="flex flex-col gap-10">
-            {/* 1 */}
             <Section id="embeddings" title="1. What are embeddings?">
               <P>
                 An embedding is a way of representing text as a list of numbers - a vector. The key
@@ -136,7 +131,6 @@ const Docs = () => (
 
             <Divider />
 
-            {/* 2 */}
             <Section id="semantic-search" title="2. Semantic search">
               <P>
                 Traditional keyword search matches exact words. Semantic search matches{" "}
@@ -160,7 +154,6 @@ top_k = sorted(chunks, by=similarity, descending=True)[:k]`}</Block>
 
             <Divider />
 
-            {/* 3 */}
             <Section id="retrieval-modes" title="3. Retrieval modes">
               <P>
                 Once embeddings are computed, there are different strategies for picking which chunks to
@@ -208,7 +201,6 @@ while len(selected) < k:
 
             <Divider />
 
-            {/* 4 */}
             <Section id="rag" title="4. Retrieval-Augmented Generation (RAG)">
               <P>
                 RAG is a pattern for making LLMs answer questions about specific documents without
@@ -252,7 +244,6 @@ Question: Why was Alice bored?`}</Block>
 
             <Divider />
 
-            {/* 5 */}
             <Section id="chunking" title="5. Chunking">
               <P>
                 Embedding models have a maximum input length (typically 256–512 tokens). Long documents
@@ -278,7 +269,6 @@ Question: Why was Alice bored?`}</Block>
 
             <Divider />
 
-            {/* 6 */}
             <Section id="umap" title="6. Dimensionality reduction & UMAP">
               <P>
                 Embedding vectors are 384 or 768 dimensions - impossible to visualise directly. To
@@ -310,7 +300,6 @@ scatter plot points`}</Block>
 
             <Divider />
 
-            {/* 7 */}
             <Section id="pipeline" title="7. How the Revelio pipeline works">
               <P>
                 Revelio is split into two parts: a Python CLI that pre-computes corpus data, and a
@@ -349,7 +338,6 @@ streamed answer → Answer Panel`}</Block>
 
             <Divider />
 
-            {/* 8 */}
             <Section id="custom-corpora" title="8. Custom data sources">
               <P>
                 Yes. Revelio supports custom corpora in addition to the built-in datasets. The UI
@@ -420,7 +408,6 @@ python revelio.py index ./path/to/your/docs --name "My Project"`}</Block>
 
             <Divider />
 
-            {/* 9 */}
             <Section id="models" title="9. Recommended models">
               <P>
                 Revelio works with any OpenAI-compatible API. Smaller instruction-following models tend

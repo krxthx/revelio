@@ -15,9 +15,7 @@ const AMBIENT_INTENSITY = 0.6;
 const POINT_LIGHT_INTENSITY = 80;
 const POINT_LIGHT_POSITION: [number, number, number] = [10, 10, 10];
 
-// Max euclidean distance (UMAP-normalized space) to draw a topology edge
 const EDGE_MAX_DIST_SQ = 0.32 * 0.32;
-// Connect retrieved chunks to each other at a wider radius
 const RETRIEVED_EDGE_MAX_DIST_SQ = 0.9 * 0.9;
 
 interface EdgeProps {
@@ -29,7 +27,6 @@ interface EdgeProps {
 const ChunkEdges = ({ chunks, retrievedIds, retrievedColor }: EdgeProps) => {
   const hasRetrieval = retrievedIds.size > 0;
 
-  // Default topology edges — only recompute when corpus changes
   const defaultGeo = useMemo(() => {
     const positions: number[] = [];
     for (let i = 0; i < chunks.length; i++) {
@@ -48,7 +45,6 @@ const ChunkEdges = ({ chunks, retrievedIds, retrievedColor }: EdgeProps) => {
     return g;
   }, [chunks]);
 
-  // Accent edges between retrieved chunks — recompute when selection changes
   const retrievedGeo = useMemo(() => {
     if (retrievedIds.size === 0) return null;
     const retrieved = chunks.filter((c) => retrievedIds.has(c.id));

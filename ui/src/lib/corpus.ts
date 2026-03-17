@@ -1,8 +1,6 @@
-// Built-in corpus IDs as a const tuple so derived types stay narrow.
 export const BUILTIN_CORPUS_IDS = ["alice", "fastapi", "space", "words"] as const;
 export type BuiltInCorpusId = (typeof BUILTIN_CORPUS_IDS)[number];
 
-// CorpusId is open-ended: built-ins + any custom slug.
 export type CorpusId = string;
 
 export interface Chunk {
@@ -30,9 +28,6 @@ export interface Corpus {
   queries: Query[];
 }
 
-// ---------------------------------------------------------------------------
-// Built-in metadata
-// ---------------------------------------------------------------------------
 
 export const CORPUS_LABELS: Record<BuiltInCorpusId, string> = {
   alice: "Alice in Wonderland",
@@ -52,9 +47,6 @@ export const isWordCorpus = (id: CorpusId): boolean => id === "words";
 export const isCustomCorpus = (id: CorpusId): boolean =>
   !(BUILTIN_CORPUS_IDS as readonly string[]).includes(id);
 
-// ---------------------------------------------------------------------------
-// Manifest (custom corpora registry)
-// ---------------------------------------------------------------------------
 
 export interface ManifestEntry {
   id: string;
@@ -75,9 +67,6 @@ export const loadManifest = async (): Promise<ManifestEntry[]> => {
   }
 };
 
-// ---------------------------------------------------------------------------
-// Corpus loader
-// ---------------------------------------------------------------------------
 
 export const loadCorpus = async (id: CorpusId): Promise<Corpus> => {
   const path = isCustomCorpus(id) ? `/data/custom/${id}.json` : `/data/${id}.json`;

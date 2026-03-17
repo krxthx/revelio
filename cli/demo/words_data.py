@@ -5,7 +5,6 @@ Each entry is embedded as "word (category)" for unambiguous retrieval.
 Add / remove words here and re-run words_pipeline.py to regenerate the corpus.
 """
 
-# Dict[category_label, list[word]]
 WORD_CATEGORIES: dict[str, list[str]] = {
     "mammal": [
         "dog", "cat", "horse", "cow", "pig", "sheep", "goat", "rabbit", "hamster", "guinea pig",
