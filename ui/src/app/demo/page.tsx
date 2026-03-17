@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
 import NavBar from "@/components/nav-bar";
@@ -58,6 +58,16 @@ const Demo = () => {
   } = useRetrieval(corpus, topK, retrievalMode);
 
   const { answer, streaming, answerError, stream, reset: resetStream } = useStreamingAnswer(llmConfig);
+
+  const focusTarget = useMemo<[number, number, number] | null>(() => {
+    if (retrievedChunks.length === 0) return null;
+    const n = retrievedChunks.length;
+    return [
+      retrievedChunks.reduce((s, sc) => s + sc.chunk.x, 0) / n,
+      retrievedChunks.reduce((s, sc) => s + sc.chunk.y, 0) / n,
+      retrievedChunks.reduce((s, sc) => s + sc.chunk.z, 0) / n,
+    ];
+  }, [retrievedChunks]);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -187,6 +197,7 @@ const Demo = () => {
                 isWordCorpus(corpusId) ? retrievedChunks.map((s) => s.chunk) : undefined
               }
               autoRotate={!selectedQuery && !selectedWord}
+              focusTarget={focusTarget}
             />
           )}
           {loading && (

@@ -1,8 +1,8 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import ChunkPoint from "./chunk-point";
 import WordGraph from "./word-graph";
@@ -91,6 +91,63 @@ const ChunkEdges = ({ chunks, retrievedIds, retrievedColor }: EdgeProps) => {
   );
 };
 
+const ZOOM_DISTANCE = 6;
+const CAMERA_LERP_SPEED = 0.055;
+
+interface CameraControllerProps {
+  focusTarget: [number, number, number] | null;
+  autoRotate: boolean;
+}
+
+const CameraController = ({ focusTarget, autoRotate }: CameraControllerProps) => {
+  const { camera } = useThree();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const controlsRef = useRef<any>(null);
+  const animTargetPos = useRef(new THREE.Vector3(...CAMERA_POSITION));
+  const animTargetLook = useRef(new THREE.Vector3(0, 0, 0));
+  const isAnimating = useRef(false);
+
+  useEffect(() => {
+    if (focusTarget) {
+      const ft = new THREE.Vector3(...focusTarget);
+      const dir = camera.position.clone().sub(ft).normalize();
+      animTargetPos.current.copy(ft).addScaledVector(dir, ZOOM_DISTANCE);
+      animTargetLook.current.copy(ft);
+    } else {
+      animTargetPos.current.set(...CAMERA_POSITION);
+      animTargetLook.current.set(0, 0, 0);
+    }
+    isAnimating.current = true;
+  // camera intentionally excluded — we only want direction at the moment focus changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusTarget]);
+
+  useFrame(() => {
+    if (!isAnimating.current || !controlsRef.current) return;
+    camera.position.lerp(animTargetPos.current, CAMERA_LERP_SPEED);
+    controlsRef.current.target.lerp(animTargetLook.current, CAMERA_LERP_SPEED);
+    controlsRef.current.update();
+    if (
+      camera.position.distanceTo(animTargetPos.current) < 0.01 &&
+      controlsRef.current.target.distanceTo(animTargetLook.current) < 0.01
+    ) {
+      isAnimating.current = false;
+    }
+  });
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enableDamping
+      dampingFactor={0.05}
+      rotateSpeed={0.6}
+      zoomSpeed={0.8}
+      autoRotate={autoRotate}
+      autoRotateSpeed={-0.5}
+    />
+  );
+};
+
 interface Props {
   chunks: Chunk[];
   retrievedIds: Set<string>;
@@ -103,6 +160,7 @@ interface Props {
   graphCenter?: Chunk;
   graphNeighbors?: Chunk[];
   autoRotate?: boolean;
+  focusTarget?: [number, number, number] | null;
 }
 
 const EmbeddingSpace = ({
@@ -116,6 +174,7 @@ const EmbeddingSpace = ({
   graphCenter,
   graphNeighbors,
   autoRotate = true,
+  focusTarget = null,
 }: Props) => {
   const hasRetrieval = retrievedIds.size > 0;
 
@@ -157,14 +216,7 @@ const EmbeddingSpace = ({
         )}
       </Suspense>
 
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.05}
-        rotateSpeed={0.6}
-        zoomSpeed={0.8}
-        autoRotate={autoRotate}
-        autoRotateSpeed={-0.5}
-      />
+      <CameraController focusTarget={focusTarget} autoRotate={autoRotate} />
     </Canvas>
   );
 };
