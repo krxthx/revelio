@@ -1,6 +1,6 @@
 "use client";
 
-import { CORPUS_IDS, CORPUS_LABELS, type CorpusId } from "@/lib/corpus";
+import { CORPUS_IDS, getCorpusLabel, type CorpusId } from "@/lib/corpus";
 
 interface Props {
   selected: CorpusId;
@@ -29,7 +29,7 @@ const CorpusSelector = ({ selected, onChange, disabled, ids = CORPUS_IDS }: Prop
               disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
             ].join(" ")}
           >
-            {CORPUS_LABELS[id]}
+            {getCorpusLabel(id)}
           </button>
         ))}
       </div>
