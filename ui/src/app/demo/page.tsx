@@ -208,7 +208,10 @@ const Demo = () => {
               </div>
             </div>
           )}
-          <ChunkTooltip chunk={hoveredChunk} />
+          <ChunkTooltip
+            chunk={hoveredChunk}
+            score={hoveredChunk ? retrievedScores?.get(hoveredChunk.id) : undefined}
+          />
         </main>
 
         <aside className="flex shrink-0 flex-col gap-4 overflow-y-auto border-t border-border px-4 py-4 lg:w-96 lg:border-l lg:border-t-0">

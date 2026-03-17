@@ -86,9 +86,12 @@ const ChunkPoint = ({
     ? POINT_OPACITY.dimmed
     : POINT_OPACITY.default;
 
-  const emissiveIntensity = isRetrieved && retrievalScore !== undefined
-    ? retrievalScore * 0.25
-    : 0;
+  const roughness = isCenter ? 0 : isRetrieved ? 0.05 : hovered ? 0.05 : isDimmed ? 0.35 : 0.1;
+  const metalness = isCenter ? 0.85 : isRetrieved ? 0.35 : hovered ? 0.9 : isDimmed ? 0.55 : 0.82;
+  const clearcoat = isDimmed ? 0.3 : 1.0;
+  const boostedEmissive = isRetrieved && retrievalScore !== undefined
+    ? retrievalScore * 0.9
+    : isCenter ? 0.35 : 0;
 
   return (
     <mesh
@@ -98,15 +101,17 @@ const ChunkPoint = ({
       onPointerOut={() => { setHovered(false); onHover(null); }}
       onClick={(e) => { e.stopPropagation(); onClick?.(chunk); }}
     >
-      <sphereGeometry args={[radius, 8, 8]} />
-      <meshStandardMaterial
+      <sphereGeometry args={[radius, 22, 16]} />
+      <meshPhysicalMaterial
         color={color}
         opacity={opacity}
-        transparent
-        roughness={0.4}
-        metalness={0.1}
-        emissive={isRetrieved ? scoredColor : "#000000"}
-        emissiveIntensity={emissiveIntensity}
+        transparent={opacity < 1}
+        roughness={roughness}
+        metalness={metalness}
+        clearcoat={clearcoat}
+        clearcoatRoughness={0.05}
+        emissive={isRetrieved ? scoredColor : isCenter ? "#ffffff" : "#000000"}
+        emissiveIntensity={boostedEmissive}
       />
     </mesh>
   );

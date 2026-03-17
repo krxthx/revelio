@@ -11,8 +11,8 @@ import { COLORS } from "@/lib/theme";
 
 const CAMERA_POSITION: [number, number, number] = [0, 0, 18];
 const CAMERA_FOV = 55;
-const AMBIENT_INTENSITY = 0.6;
-const POINT_LIGHT_INTENSITY = 80;
+const AMBIENT_INTENSITY = 0.35;
+const POINT_LIGHT_INTENSITY = 120;
 const POINT_LIGHT_POSITION: [number, number, number] = [10, 10, 10];
 
 const EDGE_MAX_DIST_SQ = 0.32 * 0.32;
@@ -185,7 +185,9 @@ const EmbeddingSpace = ({
       gl={{ antialias: true }}
     >
       <ambientLight intensity={AMBIENT_INTENSITY} />
+      <hemisphereLight args={["#a8c0e8", "#1a1a2e", 0.7]} />
       <pointLight position={POINT_LIGHT_POSITION} intensity={POINT_LIGHT_INTENSITY} />
+      <pointLight position={[-8, -6, -8]} intensity={40} color="#6080c0" />
 
       <Suspense fallback={null}>
         <ChunkEdges
