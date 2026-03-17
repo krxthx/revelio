@@ -425,10 +425,9 @@ python revelio.py index ./path/to/your/docs --name "My Project"`}</Block>
                   </thead>
                   <tbody className="divide-y divide-border text-foreground/80">
                     {[
-                      ["qwen/qwen-2.5-7b-instruct", "OpenRouter (free)", "Best free option - concise, direct answers"],
+                      ["mistralai/mistral-small-3.1-24b-instruct:free", "OpenRouter (free)", "Best free option - fast, follows instructions well"],
                       ["meta-llama/llama-3.1-8b-instruct", "OpenRouter", "Solid, widely supported"],
-                      ["mistralai/mistral-7b-instruct:free", "OpenRouter (free)", "Good baseline, always available"],
-                      ["qwen2.5:7b", "Ollama (local)", "Same model, runs fully offline"],
+                      ["mistral-small3.1", "Ollama (local)", "Runs fully offline"],
                     ].map(([model, via, notes]) => (
                       <tr key={model}>
                         <td className="px-4 py-2.5 font-mono text-foreground">{model}</td>
@@ -461,7 +460,7 @@ python revelio.py index ./path/to/your/docs --name "My Project"`}</Block>
                 </li>
                 <li>
                   Set the model ID - e.g.{" "}
-                  <Code>qwen/qwen-2.5-7b-instruct</Code>. You can browse all available models at{" "}
+                  <Code>mistralai/mistral-small-3.1-24b-instruct:free</Code>. You can browse all available models at{" "}
                   <span className="font-mono text-foreground">openrouter.ai/models</span>.
                 </li>
               </ol>

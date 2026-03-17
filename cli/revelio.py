@@ -21,7 +21,7 @@ from demo.chunking import chunk_text
 from demo.projection import normalize, project
 from extract import SUPPORTED_EXTENSIONS, extract_text
 
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_NAME = "BAAI/bge-base-en-v1.5"
 # Path to the UI public/data/custom directory, relative to this file.
 DEFAULT_OUTPUT_RELATIVE = "../ui/public/data/custom"
 
