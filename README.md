@@ -2,88 +2,68 @@
   <img src="ui/public/logo.png" alt="Revelio logo" width="96" />
 </p>
 
-# Revelio 🔎✨🚀
+# Revelio
 
-An interactive RAG (Retrieval-Augmented Generation) explorer that visualizes text embeddings in 3D space and lets you see how semantic search works under the hood. 🧠📚🌌
+Revelio is an interactive RAG explorer that makes retrieval visible.
 
-## What it shows
+Instead of treating semantic search and prompt assembly as a black box, Revelio lets you inspect the full flow: browse an embedding space in 3D, run retrieval against real corpora, inspect the exact context sent to the model, and watch the answer stream back.
 
-- **3D embedding space** - document chunks visualized using UMAP projection. Semantically similar chunks cluster together.
-- **Semantic retrieval** - select a query, watch the most relevant chunks highlight in real time.
-- **Retrieval modes** - toggle between Cosine and MMR to compare how retrieval strategy changes results.
-- **Prompt assembly** - see exactly how retrieved chunks get assembled into the LLM prompt.
-- **Streamed answer** - the LLM generates a response grounded in the retrieved context.
-- **Word embeddings** - switch to the "Word Embeddings" corpus to explore how ~2000 common English words cluster by meaning.
-- **Custom documents** - index your own files and explore them with the same pipeline.
+It is useful for:
 
-## Architecture
+- learning how embeddings and retrieval actually behave
+- demoing RAG to a team or client without hand-waving
+- comparing retrieval strategies like cosine similarity vs. MMR
+- indexing your own docs and exploring them with the same UI
 
-```
-revelio/
-├── cli/
-│   ├── revelio.py         # Custom corpus indexing CLI
-│   ├── extract.py         # Multi-format text extraction (TXT, MD, PDF, images)
-│   └── demo/
-│       ├── chunking.py        # Text splitting
-│       ├── embedding.py       # sentence-transformers inference
-│       ├── projection.py      # UMAP 3D projection + normalization
-│       ├── pipeline.py        # Orchestrates full corpus pipeline
-│       └── words_pipeline.py  # Word embedding corpus generator
-└── ui/             # Next.js frontend
-    └── src/
-        ├── app/
-        │   ├── page.tsx           # Main app
-        │   ├── demo/page.tsx      # Demo page (free model preset)
-        │   ├── docs/page.tsx      # Explainer: embeddings, RAG, UMAP, chunking
-        │   └── api/chat/route.ts  # Streaming LLM endpoint
-        ├── components/
-        │   ├── embedding-space.tsx    # 3D canvas (React Three Fiber)
-        │   ├── app-settings-menu.tsx  # LLM, corpus, retrieval, accent settings
-        │   ├── query-selector.tsx     # Pre-built query list
-        │   ├── word-browser.tsx       # Word search/browse panel
-        │   ├── similar-words.tsx      # Nearest neighbor display
-        │   ├── prompt-builder.tsx     # Shows constructed RAG prompt
-        │   └── answer-panel.tsx       # Streams LLM answer
-        └── lib/
-            ├── corpus.ts      # Corpus loading + custom manifest support
-            ├── embedder.ts    # Client-side embedding inference
-            ├── retrieval.ts   # Cosine similarity + MMR (client-side)
-            └── llm/           # OpenAI-compatible LLM adapter
-```
+## Product Overview
 
-## Setup
+Revelio combines three things in one experience:
 
-### 1. Generate corpus data (Python)
+- **A 3D embedding map** that helps you see how semantically related chunks cluster
+- **A retrieval workbench** for queries, chunk ranking, similarity thresholds, and retrieval mode comparison
+- **A grounded answer view** that shows the exact prompt context behind each model response
+
+Built-in corpora are already checked into the repo, so you can run the app immediately without generating data first.
+
+## What You Can Do
+
+- Explore built-in corpora for `Alice in Wonderland`, `FastAPI Docs`, `Space Exploration`, and `Word Embeddings`
+- Switch between cosine similarity and MMR retrieval
+- Adjust top-K retrieval and inspect the retrieved passages
+- Compare word neighborhoods in the dedicated word-embedding corpus
+- Use any OpenAI-compatible model endpoint for answer generation
+- Index your own local documents and load them into the UI as custom projects
+
+## Quick Start
+
+### 1. Configure an LLM
+
+Copy the example env file and point it at any OpenAI-compatible `/v1/chat/completions` endpoint:
 
 ```bash
-cd cli
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# Generate all built-in corpora
-python -m demo --all
-
-# Or a single corpus
-python -m demo --corpus alice
+cd ui
+cp .env.example .env.local
 ```
 
-Default embedding model: `all-MiniLM-L6-v2` (text corpora), `BAAI/bge-base-en-v1.5` (words).
-
-Output is written to `ui/public/data/{corpus}.json`.
-
-### 2. Configure the LLM
-
-The UI calls any OpenAI-compatible API. Create `ui/.env.local`:
+Example providers:
 
 ```bash
-LLM_BASE_URL=https://openrouter.ai/api/v1   # or http://localhost:11434/v1 for Ollama
-LLM_MODEL=qwen/qwen-2.5-7b-instruct
-LLM_API_KEY=your_api_key
+# OpenRouter
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=mistralai/mistral-small-3.1-24b-instruct:free
+LLM_API_KEY=your_key
 ```
 
-You can also switch providers at runtime from the settings menu in the UI.
+```bash
+# Ollama or LM Studio
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=gemma2:9b
+LLM_API_KEY=ollama
+```
 
-### 3. Run the UI
+You can also override the endpoint and model from the settings menu in the app.
+
+### 2. Run the UI
 
 ```bash
 cd ui
@@ -91,77 +71,107 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000), then go to `/demo`.
 
-## Custom documents
+## Bring Your Own Documents
 
-Index your own folder of documents and explore them with the same RAG pipeline.
+Revelio includes a CLI for turning a local folder into a custom corpus that shows up in the app.
 
 ```bash
 cd cli
+python -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
 
-python revelio.py index ./path/to/your/docs --name "My Project"
+python revelio.py index ./path/to/docs --name "My Project"
 ```
 
-Supported file types: `.txt`, `.md`, `.pdf`, `.jpg`, `.jpeg`, `.png`, `.gif`, `.webp`
+What the command does:
 
-PDF support requires `pypdf`. Image OCR requires `pytesseract` and `Pillow` (plus the `tesseract` system binary: `brew install tesseract`).
+1. Extracts text from supported files recursively
+2. Chunks and embeds the extracted text
+3. Projects the embeddings into 3D with UMAP
+4. Writes a corpus JSON file to `ui/public/data/custom/`
+5. Updates `ui/public/data/custom/manifest.json`
 
-The command:
-1. Extracts text from all supported files in the folder (recursively)
-2. Chunks, embeds, and projects the text to 3D with UMAP
-3. Writes `ui/public/data/custom/{slug}.json`
-4. Updates `ui/public/data/custom/manifest.json`
+Supported file types:
 
-Restart the dev server (`npm run dev`) and your corpus appears under **"Your Projects"** in the settings menu.
+- `.txt`
+- `.md`
+- `.pdf`
+- `.jpg`
+- `.jpeg`
+- `.png`
+- `.gif`
+- `.webp`
 
-## Recommended models
+Notes:
 
-Smaller instruction-following models tend to work better for RAG than large RLHF-trained ones - they follow the system prompt more faithfully and avoid over-hedging when context is provided.
+- PDF extraction uses `pypdf`
+- OCR uses `pytesseract` and `Pillow`
+- OCR also requires the `tesseract` system binary, for example `brew install tesseract`
 
-| Model | Via | Notes |
+After indexing, restart `npm run dev` if the app is already running.
+
+## Regenerate Built-In Corpora
+
+You only need this if you want to refresh the checked-in demo data or change embedding models.
+
+```bash
+cd cli
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# generate every built-in corpus
+python -m demo --all
+
+# or generate one corpus
+python -m demo --corpus alice
+```
+
+Generated files are written to `ui/public/data/{corpus}.json`.
+
+Default models:
+
+- Text corpora: `all-MiniLM-L6-v2`
+- Word corpus: `BAAI/bge-base-en-v1.5`
+
+## How It Works
+
+At a high level, Revelio follows this pipeline:
+
+1. Source text is chunked and embedded
+2. Embeddings are projected into 3D for visualization
+3. Queries are embedded client-side and matched against the full embedding vectors
+4. Retrieved chunks are assembled into a RAG prompt
+5. The answer is streamed from an OpenAI-compatible model endpoint
+
+Important detail: retrieval does **not** use the 3D coordinates. The 3D map is only a visualization of the higher-dimensional embedding space.
+
+## Built-In Corpora
+
+| ID | Label | Best for |
 |---|---|---|
-| `qwen/qwen-2.5-7b-instruct` | OpenRouter (free) | Best free option - concise, direct answers |
-| `meta-llama/llama-3.1-8b-instruct` | OpenRouter | Solid, widely supported |
-| `mistralai/mistral-7b-instruct:free` | OpenRouter (free) | Good baseline |
-| `qwen2.5:7b` | Ollama (local) | Same model, runs fully offline |
+| `alice` | Alice in Wonderland | narrative retrieval and quote-grounded answers |
+| `fastapi` | FastAPI Docs | documentation-style semantic search |
+| `space` | Space Exploration | broad factual topics with varied density |
+| `words` | Word Embeddings | nearest-neighbor exploration without document QA |
 
-## Retrieval modes
+## Repo Structure
 
-**Cosine similarity** - ranks all chunks by vector similarity to the query and returns the top K. Fast and straightforward. Can return redundant results if the document has repeated content.
+```text
+revelio/
+├── cli/        # corpus generation and custom indexing
+├── data/       # raw source texts and predefined queries
+└── ui/         # Next.js app, 3D visualization, chat, settings
+```
 
-**MMR (Maximal Marginal Relevance)** - picks chunks that are both relevant to the query *and* different from each other. After selecting the first chunk (highest similarity), each subsequent pick is penalized if it's too similar to an already-selected chunk. Useful when you want broader topic coverage. Configured with λ=0.5 (equal weight to relevance and diversity).
+## Tech Stack
 
-In practice: cosine is the default in most RAG systems. MMR is worth trying when your top results all cover the same passage.
-
-Both modes apply a similarity threshold of 0.3 - chunks below this score are excluded regardless of K.
-
-## A note on the 3D visualization
-
-The embedding space uses UMAP to project 384-dimensional vectors down to 3D for display. UMAP is lossy - nearby points in 3D are genuinely semantically related, but exact distances aren't preserved. **Retrieval runs on the full 384-dim embeddings**, not the projected coordinates. The 3D view is for building intuition, not for retrieval.
-
-## Corpora
-
-| ID | Label | Description |
-|----|-------|-------------|
-| `alice` | Alice in Wonderland | Classic novel - loose semantic clusters by theme and character |
-| `fastapi` | FastAPI Docs | Framework documentation - tight clusters by feature area |
-| `space` | Space Exploration | Factual text - broad topic spread, mixed density |
-| `words` | Word Embeddings | ~2000 common English words |
-| custom | Your Projects | Any folder indexed with `revelio.py index` |
-
-## Tech stack
-
-- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
-- **3D visualization**: Three.js, React Three Fiber, Drei
-- **Embeddings**: sentence-transformers (Python), client-side inference (browser)
-- **Dimensionality reduction**: UMAP (3D projection)
-- **LLM backend**: Any OpenAI-compatible API (OpenRouter, Ollama, LM Studio, vLLM)
-- **Retrieval**: Client-side cosine similarity and MMR
-
-## Future ideas
-
-- **Chunking visualizer** - compare fixed-size vs sentence vs semantic chunking side by side
-- **BM25 vs semantic** - keyword vs embedding retrieval comparison
-- **Token visualizer** - see how text and images get tokenized across different models
+- Next.js, React, TypeScript, Tailwind CSS
+- Three.js with React Three Fiber
+- sentence-transformers for embedding generation
+- UMAP for 3D projection
+- OpenAI-compatible chat backends for answer generation
+- Client-side cosine similarity and MMR retrieval
