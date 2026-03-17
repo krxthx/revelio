@@ -1,53 +1,188 @@
 {
   "alice": [
-    {"id": "alice-q01", "text": "What was written on the bottle Alice found on the glass table?"},
-    {"id": "alice-q02", "text": "What did the Cheshire Cat say to explain why everyone in Wonderland is mad?"},
-    {"id": "alice-q03", "text": "What were the subjects the Mock Turtle studied at school?"},
-    {"id": "alice-q04", "text": "Why were the three gardeners painting the roses red?"},
-    {"id": "alice-q05", "text": "What did the Caterpillar ask Alice when they first met?"},
-    {"id": "alice-q06", "text": "What did Alice shout at the end of the trial that caused chaos?"},
-    {"id": "alice-q07", "text": "What did the Mad Hatter say had gone wrong with the White Rabbit's watch?"},
-    {"id": "alice-q08", "text": "What did the Duchess's baby turn into when Alice carried it outside?"},
-    {"id": "alice-q09", "text": "What did the Pigeon call Alice when they met in the tree?"},
-    {"id": "alice-q10", "text": "What happened to Alice when she drank from the bottle labeled DRINK ME?"},
-    {"id": "alice-q11", "text": "What did the Queen shout during the croquet game?"},
-    {"id": "alice-q12", "text": "What reason did the Cheshire Cat give for going to visit the Hatter?"},
-    {"id": "alice-q13", "text": "What did Alice eat or drink to grow tall enough to reach the golden key?"},
-    {"id": "alice-q14", "text": "What did the White Rabbit say when he ran past Alice at the very beginning?"},
-    {"id": "alice-q15", "text": "What words came out wrong when Alice tried to recite 'How doth the little busy bee'?"}
+    {
+      "id": "alice-q01",
+      "text": "What was written on the bottle Alice found on the glass table?"
+    },
+    {
+      "id": "alice-q02",
+      "text": "How did the Cheshire Cat prove to Alice that it itself is mad?"
+    },
+    {
+      "id": "alice-q03",
+      "text": "What were the subjects the Mock Turtle studied at school?"
+    },
+    {
+      "id": "alice-q04",
+      "text": "Why were the three gardeners painting the roses red?"
+    },
+    {
+      "id": "alice-q05",
+      "text": "What did the Caterpillar ask Alice when they first met?"
+    },
+    {
+      "id": "alice-q06",
+      "text": "What did Alice shout at the end of the trial that caused chaos?"
+    },
+    {
+      "id": "alice-q07",
+      "text": "What did the Mad Hatter say had gone wrong with the White Rabbit's watch?"
+    },
+    {
+      "id": "alice-q08",
+      "text": "How did the Dodo decide who had won the Caucus Race?"
+    },
+    {
+      "id": "alice-q09",
+      "text": "What did the Pigeon call Alice when they met in the tree?"
+    },
+    {
+      "id": "alice-q10",
+      "text": "What happened to Alice when she drank from the bottle labeled DRINK ME?"
+    },
+    {
+      "id": "alice-q11",
+      "text": "What did the Queen shout during the croquet game?"
+    },
+    {
+      "id": "alice-q12",
+      "text": "What reason did the Cheshire Cat give for going to visit the Hatter?"
+    },
+    {
+      "id": "alice-q13",
+      "text": "What did Alice eat or drink to grow tall enough to reach the golden key?"
+    },
+    {
+      "id": "alice-q14",
+      "text": "What did the White Rabbit say when he ran past Alice at the very beginning?"
+    },
+    {
+      "id": "alice-q15",
+      "text": "What words came out wrong when Alice tried to recite 'How doth the little busy bee'?"
+    }
   ],
   "fastapi": [
-    {"id": "fastapi-q01", "text": "How do I avoid returning null or unset fields in my API response?"},
-    {"id": "fastapi-q02", "text": "What is the best way to upload files through a FastAPI endpoint?"},
-    {"id": "fastapi-q03", "text": "How can I run a task after the response has already been sent to the client?"},
-    {"id": "fastapi-q04", "text": "How do I write tests for FastAPI without spinning up a real server?"},
-    {"id": "fastapi-q05", "text": "How do I enforce numeric constraints like minimum or maximum on a path parameter?"},
-    {"id": "fastapi-q06", "text": "What is the modern way to add validation and metadata to query parameters?"},
-    {"id": "fastapi-q07", "text": "How do I structure nested JSON objects as a request body in FastAPI?"},
-    {"id": "fastapi-q08", "text": "How do I set custom headers on a response in FastAPI?"},
-    {"id": "fastapi-q09", "text": "How do I make some query parameters required and others have defaults?"},
-    {"id": "fastapi-q10", "text": "What does the error response look like when a client sends invalid data?"},
-    {"id": "fastapi-q11", "text": "How does FastAPI generate its interactive API docs automatically?"},
-    {"id": "fastapi-q12", "text": "How do I read cookies sent by the client in a FastAPI route?"},
-    {"id": "fastapi-q13", "text": "How do I group related routes together in a larger FastAPI application?"},
-    {"id": "fastapi-q14", "text": "How do I control which fields from my model actually appear in the response?"},
-    {"id": "fastapi-q15", "text": "How does FastAPI know whether a function parameter is a path param or a query param?"}
+    {
+      "id": "fastapi-q01",
+      "text": "How do I avoid returning null or unset fields in my API response?"
+    },
+    {
+      "id": "fastapi-q02",
+      "text": "What is the best way to upload files through a FastAPI endpoint?"
+    },
+    {
+      "id": "fastapi-q03",
+      "text": "How can I run a task after the response has already been sent to the client?"
+    },
+    {
+      "id": "fastapi-q04",
+      "text": "How do I write tests for FastAPI without spinning up a real server?"
+    },
+    {
+      "id": "fastapi-q05",
+      "text": "How do I enforce numeric constraints like minimum or maximum on a path parameter?"
+    },
+    {
+      "id": "fastapi-q06",
+      "text": "What is the modern way to add validation and metadata to query parameters?"
+    },
+    {
+      "id": "fastapi-q07",
+      "text": "How do I structure nested JSON objects as a request body in FastAPI?"
+    },
+    {
+      "id": "fastapi-q08",
+      "text": "How do I set custom headers on a response in FastAPI?"
+    },
+    {
+      "id": "fastapi-q09",
+      "text": "How do I make some query parameters required and others have defaults?"
+    },
+    {
+      "id": "fastapi-q10",
+      "text": "What does the error response look like when a client sends invalid data?"
+    },
+    {
+      "id": "fastapi-q11",
+      "text": "How does FastAPI generate its interactive API docs automatically?"
+    },
+    {
+      "id": "fastapi-q12",
+      "text": "How do I read cookies sent by the client in a FastAPI route?"
+    },
+    {
+      "id": "fastapi-q13",
+      "text": "How do I group related routes together in a larger FastAPI application?"
+    },
+    {
+      "id": "fastapi-q14",
+      "text": "How do I control which fields from my model actually appear in the response?"
+    },
+    {
+      "id": "fastapi-q15",
+      "text": "How does FastAPI know whether a function parameter is a path param or a query param?"
+    }
   ],
   "space": [
-    {"id": "space-q01", "text": "What went wrong on Apollo 13 and how did the crew survive?"},
-    {"id": "space-q02", "text": "How do astronauts stay healthy during months of living in zero gravity?"},
-    {"id": "space-q03", "text": "How did Voyager travel so far using only planetary gravity?"},
-    {"id": "space-q04", "text": "What caused the Challenger to break apart shortly after launch?"},
-    {"id": "space-q05", "text": "Why can the James Webb telescope see things that Hubble could not?"},
-    {"id": "space-q06", "text": "How did SpaceX figure out how to land and reuse rocket boosters?"},
-    {"id": "space-q07", "text": "What is the small observation window on the ISS that astronauts love?"},
-    {"id": "space-q08", "text": "How do astronauts stay safe from solar radiation beyond Earth's magnetic field?"},
-    {"id": "space-q09", "text": "How does a rover on Mars receive instructions from Earth despite the delay?"},
-    {"id": "space-q10", "text": "How does the ISS stay in orbit without slowly falling back to Earth?"},
-    {"id": "space-q11", "text": "What is the difference between how Saturn V got to the Moon and how the Shuttle worked?"},
-    {"id": "space-q12", "text": "How do spacewalking astronauts breathe and stay pressurized outside the station?"},
-    {"id": "space-q13", "text": "What did Hubble discover about how fast the universe is expanding?"},
-    {"id": "space-q14", "text": "How did Apollo navigate to the Moon before GPS existed?"},
-    {"id": "space-q15", "text": "Where exactly does Earth's atmosphere end and space begin?"}
+    {
+      "id": "space-q01",
+      "text": "What went wrong on Apollo 13 and how did the crew survive?"
+    },
+    {
+      "id": "space-q02",
+      "text": "How do astronauts stay healthy during months of living in zero gravity?"
+    },
+    {
+      "id": "space-q03",
+      "text": "How did Voyager travel so far using only planetary gravity?"
+    },
+    {
+      "id": "space-q04",
+      "text": "What caused the Challenger to break apart shortly after launch?"
+    },
+    {
+      "id": "space-q05",
+      "text": "Why can the James Webb telescope see things that Hubble could not?"
+    },
+    {
+      "id": "space-q06",
+      "text": "How did SpaceX figure out how to land and reuse rocket boosters?"
+    },
+    {
+      "id": "space-q07",
+      "text": "What is the small observation window on the ISS that astronauts love?"
+    },
+    {
+      "id": "space-q08",
+      "text": "How do astronauts stay safe from solar radiation beyond Earth's magnetic field?"
+    },
+    {
+      "id": "space-q09",
+      "text": "How does a rover on Mars receive instructions from Earth despite the delay?"
+    },
+    {
+      "id": "space-q10",
+      "text": "How does the ISS stay in orbit without slowly falling back to Earth?"
+    },
+    {
+      "id": "space-q11",
+      "text": "What is the difference between how Saturn V got to the Moon and how the Shuttle worked?"
+    },
+    {
+      "id": "space-q12",
+      "text": "How do spacewalking astronauts breathe and stay pressurized outside the station?"
+    },
+    {
+      "id": "space-q13",
+      "text": "What did Hubble discover about how fast the universe is expanding?"
+    },
+    {
+      "id": "space-q14",
+      "text": "How did Apollo navigate to the Moon before GPS existed?"
+    },
+    {
+      "id": "space-q15",
+      "text": "Where exactly does Earth's atmosphere end and space begin?"
+    }
   ]
 }

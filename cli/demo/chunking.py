@@ -2,8 +2,8 @@
 
 import re
 
-CHUNK_SIZE = 500     # target words per chunk
-CHUNK_OVERLAP = 100  # overlap between consecutive chunks in words
+CHUNK_SIZE = 150     # target words per chunk
+CHUNK_OVERLAP = 30   # overlap between consecutive chunks in words
 
 SEPARATORS = ["\n\n", "\n", ".", " "]
 

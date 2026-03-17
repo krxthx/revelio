@@ -35,7 +35,7 @@ export const retrieve = (
     score: cosineSimilarity(queryEmbedding, chunk.embedding),
   }));
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, topK).filter((s) => s.score >= SIMILARITY_THRESHOLD);
+  return scored.filter((s) => s.score >= SIMILARITY_THRESHOLD).slice(0, topK);
 };
 
 export const retrieveMMR = (

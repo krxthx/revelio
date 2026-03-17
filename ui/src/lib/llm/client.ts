@@ -18,7 +18,10 @@ export const fetchLLMConfigSummary = async (): Promise<LLMConfigSummary> => {
 
 export const buildRagMessages = (query: string, chunks: Chunk[]): ChatMessage[] => {
   const context = chunks.map((chunk, index) => `[${index + 1}] ${chunk.text}`).join("\n\n");
-  const userMessage = `Context:\n${context}\n\nQuestion: ${query}`;
+  const userMessage =
+    `Context:\n${context}\n\n` +
+    `Question: ${query}\n` +
+    `Important: If the question misattributes an object or action to the wrong character, explicitly correct the misattribution before answering.`;
 
   return [
     { role: "system", content: RAG_SYSTEM_PROMPT },
