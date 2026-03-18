@@ -25,6 +25,20 @@ Revelio combines three things in one experience:
 
 Built-in corpora are already checked into the repo, so you can run the app immediately without generating data first.
 
+## Current Model Stack
+
+Revelio now uses a single embedding family across the full retrieval pipeline:
+
+- **Built-in text corpora embeddings:** `BAAI/bge-base-en-v1.5`
+- **Client-side query embedding in the browser:** `BAAI/bge-base-en-v1.5`
+- **Word explorer embeddings:** `BAAI/bge-base-en-v1.5`
+- **Custom document indexing:** `BAAI/bge-base-en-v1.5`
+- **Default hosted chat model:** `mistralai/mistral-small-3.1-24b-instruct:free`
+- **OpenAI-compatible preset in the UI:** `meta-llama/llama-3.1-8b-instruct`
+- **Local prompt-model example:** `gemma2:9b`
+
+Using `bge-base-en-v1.5` everywhere keeps chunk embeddings, query embeddings, and custom corpora in the same semantic space. On the generation side, the app works with any OpenAI-compatible model endpoint, including local Gemma via Ollama.
+
 ## What You Can Do
 
 - Explore built-in corpora for `Alice in Wonderland`, `FastAPI Docs`, `Space Exploration`, and `Word Embeddings`
@@ -48,6 +62,13 @@ cp .env.example .env.local
 Example providers:
 
 ```bash
+# Ollama
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_MODEL=gemma2:9b
+LLM_API_KEY=ollama
+```
+
+```bash
 # OpenRouter
 LLM_BASE_URL=https://openrouter.ai/api/v1
 LLM_MODEL=mistralai/mistral-small-3.1-24b-instruct:free
@@ -55,10 +76,10 @@ LLM_API_KEY=your_key
 ```
 
 ```bash
-# Ollama or LM Studio
-LLM_BASE_URL=http://localhost:11434/v1
-LLM_MODEL=gemma2:9b
-LLM_API_KEY=ollama
+# OpenAI-compatible preset
+LLM_BASE_URL=http://localhost:1234/v1
+LLM_MODEL=meta-llama/llama-3.1-8b-instruct
+LLM_API_KEY=local-dev-key
 ```
 
 You can also override the endpoint and model from the settings menu in the app.
@@ -85,6 +106,34 @@ pip install -r requirements.txt
 
 python revelio.py index ./path/to/docs --name "My Project"
 ```
+
+### Custom Indexing Command Reference
+
+The custom indexing CLI currently exposes one command with two flags:
+
+```bash
+python revelio.py index <folder> --name "<project name>" [--output <dir>]
+```
+
+Variants:
+
+```bash
+# Required minimal form
+python revelio.py index ./docs --name "My Project"
+```
+
+```bash
+# Any folder path works: relative, absolute, or with ~
+python revelio.py index ~/Documents/notes --name "Personal Notes"
+```
+
+Flags:
+
+| Flag | Required | What it does |
+|---|---|---|
+| `folder` | Yes | Root folder to scan recursively for supported files |
+| `--name NAME` | Yes | Human-readable label shown in the UI |
+| `--output DIR` | No | Override the output directory for the corpus JSON and manifest |
 
 What the command does:
 
@@ -130,12 +179,57 @@ python -m demo --all
 python -m demo --corpus alice
 ```
 
+### Built-In Corpus Generation Command Reference
+
+The demo corpus generator supports every combination below:
+
+```bash
+python -m demo --all [--model <embedding-model>]
+python -m demo --corpus <alice|fastapi|space|words> [--model <embedding-model>]
+```
+
+Variants:
+
+```bash
+# Generate every built-in corpus with the default configured models
+python -m demo --all
+```
+
+```bash
+# Regenerate a single corpus
+python -m demo --corpus alice
+```
+
+```bash
+# Regenerate the word explorer only
+python -m demo --corpus words
+```
+
+```bash
+# Force the same embedding model across every generated corpus
+python -m demo --all --model BAAI/bge-base-en-v1.5
+```
+
+```bash
+# Override the embedding model for one corpus run
+python -m demo --corpus fastapi --model BAAI/bge-base-en-v1.5
+```
+
+Flags:
+
+| Flag | Required | What it does |
+|---|---|---|
+| `--all` | One of `--all` or `--corpus` | Generates every built-in corpus in one run |
+| `--corpus CORPUS` | One of `--all` or `--corpus` | Generates one corpus: `alice`, `fastapi`, `space`, or `words` |
+| `--model MODEL` | No | Overrides the default embedding model for the selected run |
+
 Generated files are written to `ui/public/data/{corpus}.json`.
 
-Default models:
+Default corpus-generation models:
 
-- Text corpora: `all-MiniLM-L6-v2`
+- Built-in text corpora: `BAAI/bge-base-en-v1.5`
 - Word corpus: `BAAI/bge-base-en-v1.5`
+- Custom indexed corpora via `revelio.py`: `BAAI/bge-base-en-v1.5`
 
 ## How It Works
 
@@ -143,8 +237,8 @@ At a high level, Revelio follows this pipeline:
 
 1. Source text is chunked and embedded
 2. Embeddings are projected into 3D for visualization
-3. Queries are embedded client-side and matched against the full embedding vectors
-4. Retrieved chunks are assembled into a RAG prompt
+3. Queries are embedded client-side with `BAAI/bge-base-en-v1.5` and matched against the full embedding vectors
+4. Retrieved chunks are assembled into a strict grounded RAG prompt
 5. The answer is streamed from an OpenAI-compatible model endpoint
 
 Important detail: retrieval does **not** use the 3D coordinates. The 3D map is only a visualization of the higher-dimensional embedding space.
