@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ScoredChunk } from "@/lib/retrieval";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 const SYSTEM_PROMPT =
   "You are a helpful assistant. Answer the question using only the provided context. " +
@@ -25,7 +26,7 @@ const PromptBuilder = ({ query, retrievedChunks }: Props) => {
         <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
           Prompt Builder
         </span>
-        <span className="text-muted-foreground text-xs">{open ? "▲" : "▼"}</span>
+        <span className="text-muted-foreground text-xs hover:cursor-pointer">{open ? <ChevronDown size={16}/> : <ChevronRight size={16}/>}</span>
       </button>
 
       {open && (
